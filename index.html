@@ -492,6 +492,10 @@ input::placeholder,textarea::placeholder{color:rgba(191,200,255,.45)}
 .pacte h1{font-size:clamp(30px,8vw,46px);line-height:1.05}
 .pacte p{color:var(--lilac);font-size:16px}
 .pacte p.eyebrow{color:var(--yellow);font-size:11px}
+.invcode{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1.5px dashed rgba(255,183,3,.6);border-radius:14px;padding:12px 16px;background:rgba(255,183,3,.08)}
+.invcode span{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--lilac)}
+.invcode b{font-family:var(--f-disp);font-weight:600;font-size:24px;color:var(--yellow)}
+.hello{font-family:var(--f-disp);font-weight:600;font-size:clamp(18px,4.6vw,22px);color:var(--yellow)}
 .warn{display:flex;flex-wrap:wrap;gap:8px}
 .warn span{border:1.5px solid rgba(255,92,147,.45);color:#fff;background:rgba(216,17,89,.14);border-radius:99px;padding:5px 12px;font-size:13px;font-weight:700}
 .check{display:flex;gap:12px;align-items:center;font-size:15px;font-weight:700;color:#fff;background:rgba(255,255,255,.06);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px}
@@ -812,12 +816,21 @@ function captureInvite() {
   if (tok) {
     try {
       const o = JSON.parse(b64d(tok)), id = parseInviteCode(o.c);
-      if (id) { const inv = { id, n: String(o.n || "").slice(0, 40), r: /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(o.r || "") ? String(o.r) : "" }; storeInvite(inv); try { history.replaceState(null, "", location.pathname); } catch (e) {} return inv; }
+      if (id) { const inv = { id, n: String(o.n || "").trim().slice(0, 40), r: /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(o.r || "") ? String(o.r) : "" }; storeInvite(inv); INVITE_FRESH = true; try { history.replaceState(null, "", location.pathname); } catch (e) {} return inv; }
     } catch (e) {}
   }
   return readInvite();
 }
-let INVITE = null;
+let INVITE = null, INVITE_FRESH = false;
+const greetWord = () => { const h = new Date().getHours(); return h >= 18 || h < 4 ? "Bonsoir" : "Bonjour"; };
+function welcomeInvite(hadSaved) {
+  mode("gate"); setBackdrop("");
+  const n = INVITE && INVITE.n ? INVITE.n : "";
+  render(`<section class="pacte"><img src="${LOGO}" alt="BONGO" style="width:min(260px,70vw);height:auto;display:block"><p class="eyebrow">Invitation personnelle</p><h1>${n ? `Bienvenue, ${esc(n)}.` : "Bienvenue."}</h1><p>${n ? `${esc(n)}, tu` : "Tu"} es invité(e) à découvrir en avant-première l'épisode 1 de BONGO, la série qui entraîne ton esprit critique. Compte environ 25 minutes, avec des écouteurs si possible.</p><div class="invcode"><span>Ton code testeur</span><b>${esc(INVITE.id)}</b></div><button class="btn gold wide" id="wgo">Commencer</button>${hadSaved ? `<button class="btn ghost wide" id="wold">J'ai déjà un profil sur ce téléphone</button>` : ""}</section>`);
+  sfx("sting");
+  $("#wgo").onclick = () => { ac(); S = newState(); S.nm = n; newProfile(hadSaved); };
+  const o = $("#wold"); if (o) o.onclick = () => whoWatches();
+}
 function invitationGate() {
   mode("gate"); setBackdrop("");
   render(`<section class="pacte"><img src="${LOGO}" alt="BONGO" style="width:min(280px,72vw);height:auto;display:block"><p class="eyebrow">Pilote privé · sur invitation</p><h1>Cet épisode est réservé aux invités.</h1><p>Ouvre le lien personnel reçu dans ton invitation, ou saisis ici ton code d'invitation.</p><label class="f" for="gcode">Code d'invitation<input type="text" id="gcode" placeholder="T-0000-XX" autocomplete="off" autocapitalize="characters" spellcheck="false"></label><button class="btn gold wide" id="gok">Entrer</button><p class="small" id="gst" role="status"></p></section>`);
@@ -1511,7 +1524,7 @@ function credits() {
     setBackdrop(SH.net()); setProg("bilan");
     render(`<section class="credits"><div class="roll"><div class="roll-in">
       <div><img class="roll-logo" src="${LOGO}" alt="BONGO"><p><span>Saison 1 · Épisode 1</span><br>Trois secondes</p></div>
-      <div><h4>Avec</h4><p>Toi <span>dans ton propre rôle</span></p><p>Ya Mado <span>la mentor</span></p><p>Tonton Dédé <span>l'oncle qui sait tout</span></p><p>Tante Annie <span>la mémoire d'octobre</span></p><p>Maman Bijou <span>qui transfère</span></p><p>Fiston <span>le cousin qui vérifie</span></p><p>Kimia <span>qui transfère à son église</span></p><p>@VraiKin243 <span>40 128 abonnés</span></p><p>Et ton cerveau rapide <span>dans le rôle du wewa</span></p></div>
+      <div><h4>Avec</h4><p>${S.nm ? esc(S.nm) : "Toi"} <span>dans ton propre rôle</span></p><p>Ya Mado <span>la mentor</span></p><p>Tonton Dédé <span>l'oncle qui sait tout</span></p><p>Tante Annie <span>la mémoire d'octobre</span></p><p>Maman Bijou <span>qui transfère</span></p><p>Fiston <span>le cousin qui vérifie</span></p><p>Kimia <span>qui transfère à son église</span></p><p>@VraiKin243 <span>40 128 abonnés</span></p><p>Et ton cerveau rapide <span>dans le rôle du wewa</span></p></div>
       <div><h4>D'après les travaux de</h4><p>Daniel Simons et Christopher Chabris<br>Elizabeth Loftus et John Palmer<br>Shane Frederick</p></div>
       <div><h4>Une production</h4><p>BONGO · Académie de l'esprit critique<br>Kinshasa, 2026</p></div>
       <div><p><span>Les personnes, entreprises et comptes de cet épisode sont fictifs.<br>Aucun cerveau n'a été maltraité, sauf le tien, un peu.</span></p></div>
@@ -1547,7 +1560,7 @@ async function bilan() {
   const top = Object.entries(s.traps).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([k]) => TRAPS[k].toLowerCase());
   const lion = S.et.ET2 && S.et.ET2.ok, trapped = S.pg && S.pg.r === "tombe", met = metTraps();
   const slides = [
-    { bg: "linear-gradient(165deg,#4d22d2 0%,#141130 72%)", html: `<p class="st-k">Ton épisode 1</p><div class="st-big"><span data-count="${s.ok}">0</span><small>/ 13</small></div><p class="st-t">bonnes réponses, dont ${vs.ok} sur 8 au Verdict.</p><div class="st-chips"><span><b>${dur} min</b> de visionnage</span><span><b>${s.to}</b> question${s.to > 1 ? "s" : ""} perdue${s.to > 1 ? "s" : ""} au chrono</span></div>` },
+    { bg: "linear-gradient(165deg,#4d22d2 0%,#141130 72%)", html: `<p class="st-k">${S.nm ? esc(S.nm) + ", ton épisode 1" : "Ton épisode 1"}</p><div class="st-big"><span data-count="${s.ok}">0</span><small>/ 13</small></div><p class="st-t">bonnes réponses, dont ${vs.ok} sur 8 au Verdict.</p><div class="st-chips"><span><b>${dur} min</b> de visionnage</span><span><b>${s.to}</b> question${s.to > 1 ? "s" : ""} perdue${s.to > 1 ? "s" : ""} au chrono</span></div>` },
     { bg: "linear-gradient(165deg,#0796f0 0%,#0846a0 48%,#141130 100%)", html: `<p class="st-k">Le prologue</p><div class="st-big"><span data-count="${7 - e.ok}">0</span><small>/ 7</small></div><p class="st-t">erreurs au test d'entrée.</p><p class="st-p">${lion ? "Tu as vu le lion traverser le marché. C'est rare : la moitié des gens ne le voient pas." : "Un lion a traversé le marché sous tes yeux, et ton cerveau l'a effacé."}</p>` },
     { bg: "linear-gradient(165deg,#d81159 0%,#4d22d2 75%)", html: `<p class="st-k">Ta certitude</p><div class="st-big mid">${e.overc} → ${s.overc}</div><p class="st-t">fois « certain » en te trompant : au test, puis dans l'épisode.</p><p class="st-p"><b>${s.pts > 0 ? "+" : s.pts < 0 ? "−" : ""}${Math.abs(s.pts)} point${Math.abs(s.pts) > 1 ? "s" : ""}</b> de certitude sur 39. ${esc(cal)}</p>` },
     { bg: trapped ? "linear-gradient(165deg,#dd1c1a 0%,#d81159 45%,#141130 100%)" : "linear-gradient(165deg,#4895ef 0%,#0846a0 55%,#141130 100%)", html: `<p class="st-k">Le Piège BONGO</p><div class="st-stamp">${trapped ? "Tombé" : "Évité"}</div><p class="st-t">${trapped ? "La fausse Ya Mado t'a eu." : "La fausse Ya Mado ne t'a pas eu."}</p><p class="st-p">Une personne de confiance et une échéance : les deux leviers des escroqueries les plus efficaces.</p><div class="st-chips"><span>Preuve du communiqué : <b>${S.dos && S.dos.ok ? "trouvée" : "manquée"}</b></span><span>Publications bien classées : <b>${S.sort ? S.sort.good : 0} / 5</b></span></div>` },
@@ -1627,9 +1640,9 @@ function whoWatches() {
   mode("gate"); hush(); setBackdrop(""); $("#meAv").innerHTML = "";
   const saved = load();
   const status = (x) => x.done ? "Épisode terminé" : x.step && x.step !== "accueil" ? "En cours · " + (CH[x.step] || [""])[0] : "Profil prêt";
-  render(`<div class="gate"><h1>Qui regarde ?</h1><div class="profiles">${saved && saved.pact ? `<button class="prof-t" id="pSaved"><span class="pic">${avatarSVG(saved.av)}</span>${esc(saved.id)}<small>${esc(status(saved))}</small></button>` : ""}<button class="prof-t" id="pNew"><span class="pic add">${ICON.plus}</span>${INVITE && INVITE.n ? esc(INVITE.n) : "Nouveau testeur"}<small>${INVITE ? "Invitation reçue" : "Panel du pilote"}</small></button><button class="prof-t" id="pCoord" hidden><span class="pic add">${ICON.chart}</span>Coordinateur<small>Résultats du panel</small></button></div><p class="small">BONGO · Académie de l'esprit critique · Pilote privé</p></div>`);
+  render(`<div class="gate"><h1>${INVITE && INVITE.n && !(saved && saved.pact && saved.nm) ? `${greetWord()} ${esc(INVITE.n)}, qui regarde ?` : "Qui regarde ?"}</h1><div class="profiles">${saved && saved.pact ? `<button class="prof-t" id="pSaved"><span class="pic">${avatarSVG(saved.av)}</span>${esc(saved.nm || saved.id)}<small>${esc((saved.nm ? saved.id + " · " : "") + status(saved))}</small></button>` : ""}<button class="prof-t" id="pNew"><span class="pic add">${ICON.plus}</span>${INVITE && INVITE.n ? esc(INVITE.n) : "Nouveau testeur"}<small>${INVITE ? "Invitation reçue" : "Panel du pilote"}</small></button><button class="prof-t" id="pCoord" hidden><span class="pic add">${ICON.chart}</span>Coordinateur<small>Résultats du panel</small></button></div><p class="small">BONGO · Académie de l'esprit critique · Pilote privé</p></div>`);
   if (saved && saved.pact) $("#pSaved").onclick = () => { S = saved; applyToggles(); home(); };
-  $("#pNew").onclick = () => { S = newState(); newProfile(!!(saved && saved.pact)); };
+  $("#pNew").onclick = () => { S = newState(); if (INVITE && INVITE.n) S.nm = INVITE.n; newProfile(!!(saved && saved.pact)); };
   $("#pCoord").onclick = () => { location.hash = "#coordination"; };
   isOwner().then((ok) => { const c = $("#pCoord"); if (ok && c) c.hidden = false; });
 }
@@ -1638,7 +1651,8 @@ function newProfile(hadSaved) {
   const AGES = ["17-19", "20-24", "25-28", "29 et plus"], STS = ["Élève", "Étudiant", "Jeune diplômé", "En emploi", "Autre"];
   if (!S.av) S.av = AVK[Math.floor(Math.random() * AVK.length)];
   if (INVITE && INVITE.id) S.id = INVITE.id;
-  render(`<section class="pform"><p class="eyebrow">Étape 1 sur 2</p><h1>${INVITE && INVITE.n ? `Bienvenue, ${esc(INVITE.n)}` : "Crée ton profil"}</h1>${INVITE && INVITE.id ? `<p class="lead">Ton invitation est reconnue : ton code testeur est déjà rempli.</p>` : ""}
+  if (INVITE && INVITE.n && !S.nm) S.nm = INVITE.n;
+  render(`<section class="pform"><p class="eyebrow">Étape 1 sur 2</p><h1>${S.nm ? `${esc(S.nm)}, crée ton profil` : "Crée ton profil"}</h1>${INVITE && INVITE.id ? `<p class="lead">Ton invitation est reconnue : ton code testeur est déjà rempli.</p>` : ""}
   <div><p class="lbl">Ton avatar</p><div class="avs">${AVK.map((k, i) => `<button class="avb" data-av="${k}" aria-pressed="${k === S.av}" aria-label="Avatar ${i + 1}">${avatarSVG(k)}</button>`).join("")}</div></div>
   <label class="f" for="fid">Ton code testeur, donné par le coordinateur (ou garde celui-ci)<input type="text" id="fid" maxlength="16" value="${esc(S.id)}" autocomplete="off"></label>
   <div><p class="lbl">Ton âge</p><div class="chips2" data-g="age">${AGES.map((a) => `<button data-v="${a}" aria-pressed="${S.age === a}">${a}</button>`).join("")}</div></div>
@@ -1669,7 +1683,7 @@ function trapTile(k, i, met) { const got = met.includes(k); return `<div class="
 function home() {
   mode("browse"); hush(); setPaused(false); $("#meAv").innerHTML = avatarSVG(S.av);
   const started = !!S.t0 && S.step !== "accueil" && !S.done, c = CH[S.step], met = metTraps();
-  render(`<section class="bill" id="billtop"><div class="bill-blur"><div class="art">${BILL()}</div></div><div class="bill-stage"><div class="in">${BILL()}</div></div><div class="bill-fade"></div><div class="bill-in"><p class="series">${logoIcon(26)}<span>Série</span></p><div class="bill-title">${ransom("TROIS SECONDES", 5)}</div><p class="meta"><span class="new">Nouveau</span><span>2026</span><span class="age">16+</span><span>Saison 1 · Épisode 1</span><span>≈ 25 min</span><span class="free">3 épisodes gratuits</span></p><p class="bill-tag">Un audio. Sept secondes. Ta famille panique, et ton pouce est déjà sur « Transférer ».</p>${started ? `<div class="resume"><div class="rbar"><i style="width:${progPct()}%"></i></div><span>Reprendre à : ${esc(c ? c[0] + " · " + c[1] : "")}</span></div>` : ""}<div class="bill-btns"><button class="btn" id="play">${ICON.play}${playLabel()}</button><button class="btn ghost" id="info">${ICON.info}Plus d'infos</button></div></div></section>
+  render(`<section class="bill" id="billtop"><div class="bill-blur"><div class="art">${BILL()}</div></div><div class="bill-stage"><div class="in">${BILL()}</div></div><div class="bill-fade"></div><div class="bill-in">${S.nm ? `<p class="hello">${greetWord()} ${esc(S.nm)}, ton épisode t'attend.</p>` : ""}<p class="series">${logoIcon(26)}<span>Série</span></p><div class="bill-title">${ransom("TROIS SECONDES", 5)}</div><p class="meta"><span class="new">Nouveau</span><span>2026</span><span class="age">16+</span><span>Saison 1 · Épisode 1</span><span>≈ 25 min</span><span class="free">3 épisodes gratuits</span></p><p class="bill-tag">Un audio. Sept secondes. Ta famille panique, et ton pouce est déjà sur « Transférer ».</p>${started ? `<div class="resume"><div class="rbar"><i style="width:${progPct()}%"></i></div><span>Reprendre à : ${esc(c ? c[0] + " · " + c[1] : "")}</span></div>` : ""}<div class="bill-btns"><button class="btn" id="play">${ICON.play}${playLabel()}</button><button class="btn ghost" id="info">${ICON.info}Plus d'infos</button></div></div></section>
   <section class="rail" id="railS1"><h3>Saison 1 · Ne te fais plus avoir <small>6 épisodes · les 3 premiers gratuits</small></h3><div class="rscroll">${EPS.map(epPoster).join("")}</div></section>
   <section class="rail" id="railTraps"><h3>Les douze pièges à collectionner <small>${met.length} sur 12 débloqué${met.length > 1 ? "s" : ""}</small></h3><div class="rscroll">${Object.keys(TRAPS).map((k, i) => trapTile(k, i, met)).join("")}</div></section>
   <footer class="foot"><p>Pilote privé destiné au panel de test. Les personnes, entreprises et comptes de cet épisode sont fictifs.</p><p id="coordLink" hidden><a href="#coordination">Espace coordinateur du panel</a></p></footer>`);
@@ -1823,7 +1837,8 @@ function renderInvites() {
 }
 function parseInvites(text) {
   const out = [], re = /[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}/g;
-  String(text || "").split(/[\n;]+/).forEach((line) => { const ems = line.match(re) || []; if (!ems.length) return; const name = ems.length === 1 ? line.replace(ems[0], " ").replace(/[<>,:()"']/g, " ").replace(/\s+/g, " ").trim().slice(0, 40) : ""; ems.forEach((em) => out.push({ email: em.toLowerCase(), name })); });
+  let pending = "";
+  String(text || "").split(/[\n;]+/).forEach((line) => { const ems = line.match(re) || []; const clean = (t) => t.replace(/[<>,:()"']/g, " ").replace(/\s+/g, " ").trim().slice(0, 40); if (!ems.length) { pending = clean(line); return; } let name = ems.length === 1 ? clean(line.replace(ems[0], " ")) : ""; if (!name && pending) name = pending; pending = ""; ems.forEach((em) => out.push({ email: em.toLowerCase(), name })); });
   return out;
 }
 function initInvites() {
@@ -1852,7 +1867,7 @@ function syncInvites() {
 
 
 /* ---------- Démarrage ---------- */
-function start() { $("#brand").innerHTML = `<img src="${LOGO}" alt="BONGO">`; applyToggles(); setPaused(false); INVITE = captureInvite(); const sv = load(); if (location.hash === "#coordination") coordination(); else if (HOSTED && !INVITE && !(sv && sv.pact)) invitationGate(); else whoWatches(); }
+function start() { $("#brand").innerHTML = `<img src="${LOGO}" alt="BONGO">`; applyToggles(); setPaused(false); INVITE = captureInvite(); const sv = load(); if (location.hash === "#coordination") coordination(); else if (HOSTED && !INVITE && !(sv && sv.pact)) invitationGate(); else if (INVITE && INVITE_FRESH && !(sv && sv.pact && sv.id === INVITE.id)) welcomeInvite(!!(sv && sv.pact)); else whoWatches(); }
 window.addEventListener("hashchange", () => { if (location.hash === "#coordination") coordination(); });
 try { if (window.claude && window.claude.hot && window.claude.hot.snapshot) window.claude.hot.snapshot(() => ({ S })); } catch (e) {}
 if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(start); else start();
