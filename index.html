@@ -492,6 +492,24 @@ input::placeholder,textarea::placeholder{color:rgba(191,200,255,.45)}
 .pacte h1{font-size:clamp(30px,8vw,46px);line-height:1.05}
 .pacte p{color:var(--lilac);font-size:16px}
 .pacte p.eyebrow{color:var(--yellow);font-size:11px}
+.pacte p.lbl{font-size:11px;color:var(--dim)}
+.pacte p.small{font-size:13px;color:var(--dim)}
+.mission-page{max-width:600px}
+.mission-page h1{font-size:clamp(28px,7.4vw,42px);line-height:1.08}
+.mlead{font-size:16.5px!important;color:#fff!important;line-height:1.55}
+.msteps{display:grid;gap:10px}
+.mstep{display:grid;grid-template-columns:38px 1fr;gap:12px;align-items:start;background:rgba(255,255,255,.04);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;animation:fadeUp .45s both}
+.mstep:nth-child(2){animation-delay:.08s}.mstep:nth-child(3){animation-delay:.16s}.mstep:nth-child(4){animation-delay:.24s}
+.mstep .mn{width:34px;height:34px;border-radius:50%;background:var(--yellow);color:var(--navy);display:grid;place-items:center;font-family:var(--f-disp);font-weight:700;font-size:17px}
+.mstep b{display:block;font-size:15.5px;color:#fff;margin-bottom:2px}
+.mstep p{font-size:14px!important;color:var(--lilac)!important;line-height:1.5}
+.mvals{display:grid;gap:8px;grid-template-columns:1fr}
+@media (min-width:560px){.mvals{grid-template-columns:repeat(3,1fr)}}
+.mvals div{border-left:3px solid var(--pink);background:rgba(216,17,89,.08);border-radius:0 12px 12px 0;padding:10px 12px;display:grid;gap:2px}
+.mvals b{font-size:14.5px;color:#fff}.mvals span{font-size:13px;color:var(--lilac)}
+.mcard{margin:6px max(20px,4vw) 0;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;background:rgba(255,183,3,.08);border:1.5px solid rgba(255,183,3,.45);border-radius:14px;padding:14px 16px;position:relative;z-index:2}
+.mcard p{font-size:14.5px;color:#fff;max-width:46em}.mcard .eyebrow{margin-bottom:4px}
+.mcard .btn{padding:10px 16px;font-size:14px}
 .invcode{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1.5px dashed rgba(255,183,3,.6);border-radius:14px;padding:12px 16px;background:rgba(255,183,3,.08)}
 .invcode span{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--lilac)}
 .invcode b{font-family:var(--f-disp);font-weight:600;font-size:24px;color:var(--yellow)}
@@ -838,7 +856,7 @@ function welcomeInvite(hadSaved) {
   const n = INVITE && INVITE.n ? INVITE.n : "";
   render(`<section class="pacte"><img src="${LOGO}" alt="BONGO" style="width:min(260px,70vw);height:auto;display:block"><p class="eyebrow">Invitation personnelle</p><h1>${n ? `Bienvenue, ${esc(n)}.` : "Bienvenue."}</h1><p>${n ? `${esc(n)}, tu` : "Tu"} es invité(e) à découvrir en avant-première l'épisode 1 de BONGO, la série qui entraîne ton esprit critique. Compte environ 25 minutes, avec des écouteurs si possible.</p><div class="invcode"><span>Ton code testeur</span><b>${esc(INVITE.id)}</b></div><button class="btn gold wide" id="wgo">Commencer</button>${hadSaved ? `<button class="btn ghost wide" id="wold">J'ai déjà un profil sur ce téléphone</button>` : ""}</section>`);
   sfx("sting");
-  $("#wgo").onclick = () => { ac(); S = newState(); S.nm = n; newProfile(hadSaved); };
+  $("#wgo").onclick = () => { ac(); S = newState(); S.nm = n; missionPage(() => newProfile(hadSaved)); };
   const o = $("#wold"); if (o) o.onclick = () => whoWatches();
 }
 function invitationGate() {
@@ -1601,7 +1619,7 @@ function group(id, label, opts, cls = "") { return `<div style="display:grid;gap
 const MOMENTS = [["test", "Le test vidéo"], ["audio", "L'audio"], ["fil", "Le groupe famille"], ["doc", "Le communiqué"], ["piege", "Le piège"], ["wewa", "Le wewa"], ["compte", "@VraiKin243"], ["qcm", "Les QCM"]];
 async function avis() {
   mode("page"); setBackdrop("");
-  render(`<div class="page"><p class="eyebrow">Ton avis compte</p><h1>Dix questions, deux minutes</h1><p class="small">Tes réponses sont anonymes : seul ton code testeur les accompagne. N'écris pas ton nom.</p>
+  render(`<div class="page"><p class="eyebrow">Ta mission · ton avis compte</p><h1>Dix questions, deux minutes</h1><p class="small">Tes réponses sont anonymes : seul ton code testeur les accompagne. N'écris pas ton nom.</p>
   ${group("note", "Note l'épisode, de 0 à 10", Array.from({ length: 11 }, (_, i) => [i, i]), "nums")}
   ${group("suite", "Tu veux voir l'épisode 2 ?", [["oui", "Oui, tout de suite"], ["peut", "Peut-être"], ["non", "Non"]])}
   ${group("prix", "Les épisodes 1 à 3 sont gratuits. Pour débloquer la suite de la saison 1 (épisodes 4 à 6), tu paierais…", [["0", "Rien"], ["1", "1 USD"], ["2.99", "2,99 USD"], ["5", "5 USD ou plus"]])}
@@ -1628,7 +1646,7 @@ function codeView() {
   mode("page"); setBackdrop(""); $("#meAv").innerHTML = avatarSVG(S.av);
   const s = statsOf(S.q, EP_IDS), e = statsOf(S.et, ET_IDS), code = "BONGO2." + b64e(JSON.stringify(payload()));
   const msg = `BONGO pilote · ${S.id} · test ${e.ok}/7 · épisode ${s.ok}/13 · note ${S.fb.note != null ? S.fb.note : "?"}/10\n${code}`;
-  render(`<div class="page"><p class="eyebrow">Dernière étape</p><h1>Envoie ton code au coordinateur</h1><p class="lead">Copie ce message et colle-le dans la conversation WhatsApp du panel. Il contient tes réponses et ton avis, sans ton nom.</p><div class="code" id="code" tabindex="0">${esc(msg)}</div><button class="btn gold wide" id="cp">Copier le message</button><div class="row"><a class="btn ghost" id="cpwa" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Envoyer sur WhatsApp</a><a class="btn ghost" id="cpmail" href="mailto:${INVITE && INVITE.r ? INVITE.r : ""}?subject=${encodeURIComponent("Mes résultats BONGO · " + S.id)}&body=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Envoyer par e-mail</a></div><p class="small" id="cpst" role="status"></p>
+  render(`<div class="page"><p class="eyebrow">Dernière étape de ta mission</p><h1>Envoie ton code au coordinateur</h1><p class="lead">Copie ce message et colle-le dans la conversation WhatsApp du panel. Il contient tes réponses et ton avis, sans ton nom.</p><div class="code" id="code" tabindex="0">${esc(msg)}</div><button class="btn gold wide" id="cp">Copier le message</button><div class="row"><a class="btn ghost" id="cpwa" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Envoyer sur WhatsApp</a><a class="btn ghost" id="cpmail" href="mailto:${INVITE && INVITE.r ? INVITE.r : ""}?subject=${encodeURIComponent("Mes résultats BONGO · " + S.id)}&body=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Envoyer par e-mail</a></div><p class="small" id="cpst" role="status"></p>
   <section class="card"><p class="eyebrow">À suivre</p><div class="upn">${posterHTML(EPS[1])}<div style="display:grid;gap:6px"><h3 style="font-size:21px">É2 · L'Œil</h3><p class="lead">Ya Mado va te montrer ce que tu regardes sans le voir. Et Grâce appelle : « J'ai un dossier de crédit trop parfait. »</p><p class="small">Gratuit · disponible pour le panel au prochain test</p></div></div></section>
   <div class="row"><button class="btn ghost" id="tohome">Retour à l'accueil</button><button class="btn ghost" id="again">Nouveau testeur</button></div></div>`);
   $("#cp").onclick = async () => { try { await navigator.clipboard.writeText(msg); $("#cpst").textContent = "Copié. Colle-le maintenant dans WhatsApp."; } catch (err) { const r = document.createRange(); r.selectNodeContents($("#code")); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(r); $("#cpst").textContent = "Le texte est sélectionné : copie-le avec ton téléphone."; } };
@@ -1645,6 +1663,36 @@ async function isOwner() {
   return OWNER;
 }
 
+
+/* ---------- Ta mission de testeur ---------- */
+function missionHTML(full) {
+  const n = S.nm || (INVITE && INVITE.n) || "";
+  return `${full ? `<img src="${LOGO}" alt="BONGO" style="width:min(220px,60vw);height:auto;display:block">` : ""}<p class="eyebrow">${full ? "Étape 1 sur 3 · " : ""}Ta mission de testeur</p><h1>${n ? `${esc(n)}, tu fais partie du premier panel BONGO.` : "Tu fais partie du premier panel BONGO."}</h1>
+  <p class="mlead">Avant son lancement à Kinshasa, BONGO est confié à un petit groupe de jeunes. Ton rôle n'est pas de réussir : c'est de vivre les épisodes qui te sont soumis comme un vrai spectateur, puis de nous dire franchement ce que tu en as pensé. Ton avis décidera de ce que deviendra la série.</p>
+  <div class="msteps">
+    <div class="mstep"><span class="mn">1</span><div><b>Regarde l'épisode 1 jusqu'au bout</b><p>Environ 25 minutes : un test vidéo, cinq chapitres, puis le Verdict. Joue le jeu, sans aide ni recherche : tes erreurs comptent autant que tes réussites.</p></div></div>
+    <div class="mstep"><span class="mn">2</span><div><b>Donne ton avis en dix questions</b><p>Deux minutes à la fin : ce qui t'a captivé, ce qui t'a ennuyé, ce qui t'a surpris, et ce que tu serais prêt à payer.</p></div></div>
+    <div class="mstep"><span class="mn">3</span><div><b>Renvoie ton code de résultats</b><p>Un message à copier, que tu envoies au coordinateur par WhatsApp ou par e-mail. Il contient tes réponses et ton avis, jamais ton nom.</p></div></div>
+    <div class="mstep"><span class="mn">4</span><div><b>Reste disponible pour la suite</b><p>Les épisodes 2 et 3, eux aussi gratuits, te seront soumis lors des prochains tests. Ta fidélité compte autant que ton premier avis.</p></div></div>
+  </div>
+  <p class="lbl" style="margin:6px 0 0">Ce que nous attendons de toi</p>
+  <div class="mvals"><div><b>Sois franc</b><span>Une critique sincère vaut plus qu'un compliment poli.</span></div><div><b>Sois toi-même</b><span>Il n'y a ni bonne ni mauvaise façon de vivre l'épisode.</span></div><div><b>Garde le secret</b><span>Ne raconte pas l'épisode : la surprise fait partie du test.</span></div></div>
+  <p class="small">Écouteurs conseillés · moins de 1 Mo de données · idéalement en une seule fois, au calme.</p>`;
+}
+function missionPage(next) {
+  mode("gate"); setBackdrop("");
+  render(`<section class="pacte mission-page">${missionHTML(true)}<button class="btn gold wide" id="maccept">J'accepte ma mission</button><button class="btn ghost wide" id="mback">Retour</button></section>`);
+  $("#maccept").onclick = () => { S.mission = 1; sfx("good"); next(); };
+  $("#mback").onclick = () => whoWatches();
+}
+function missionSheet() {
+  const old = $("#sheet"); if (old) old.remove();
+  const sh = document.createElement("div"); sh.className = "sheet"; sh.id = "sheet";
+  sh.innerHTML = `<div class="sheet-in" role="dialog" aria-modal="true" aria-label="Ta mission de testeur"><div class="sh-body mission-page" style="margin-top:0;padding-top:22px"><button class="sh-x" id="shx" aria-label="Fermer" style="position:static;justify-self:end">×</button>${missionHTML(false)}<button class="btn gold wide" id="mok">C'est clair</button></div></div>`;
+  document.body.appendChild(sh);
+  const close = () => sh.remove(); $("#shx").onclick = close; $("#mok").onclick = close; sh.onclick = (ev) => { if (ev.target === sh) close(); };
+}
+
 /* ---------- Qui regarde ? ---------- */
 function whoWatches() {
   mode("gate"); hush(); setBackdrop(""); $("#meAv").innerHTML = "";
@@ -1652,7 +1700,7 @@ function whoWatches() {
   const status = (x) => x.done ? "Épisode terminé" : x.step && x.step !== "accueil" ? "En cours · " + (CH[x.step] || [""])[0] : "Profil prêt";
   render(`<div class="gate"><h1>${INVITE && INVITE.n && !(saved && saved.pact && saved.nm) ? `${greetWord()} ${esc(INVITE.n)}, qui regarde ?` : "Qui regarde ?"}</h1><div class="profiles">${saved && saved.pact ? `<button class="prof-t" id="pSaved"><span class="pic">${avatarSVG(saved.av)}</span>${esc(saved.nm || saved.id)}<small>${esc((saved.nm ? saved.id + " · " : "") + status(saved))}</small></button>` : ""}<button class="prof-t" id="pNew"><span class="pic add">${ICON.plus}</span>${INVITE && INVITE.n ? esc(INVITE.n) : "Nouveau testeur"}<small>${INVITE ? "Invitation reçue" : "Panel du pilote"}</small></button><button class="prof-t" id="pCoord" hidden><span class="pic add">${ICON.chart}</span>Coordinateur<small>Résultats du panel</small></button></div><p class="small">BONGO · Académie de l'esprit critique · Pilote privé</p></div>`);
   if (saved && saved.pact) $("#pSaved").onclick = () => { S = saved; applyToggles(); home(); };
-  $("#pNew").onclick = () => { S = newState(); if (INVITE && INVITE.n) S.nm = INVITE.n; newProfile(!!(saved && saved.pact)); };
+  $("#pNew").onclick = () => { S = newState(); if (INVITE && INVITE.n) S.nm = INVITE.n; const hs = !!(saved && saved.pact); missionPage(() => newProfile(hs)); };
   $("#pCoord").onclick = () => { location.hash = "#coordination"; };
   isOwner().then((ok) => { const c = $("#pCoord"); if (ok && c) c.hidden = false; });
 }
@@ -1662,7 +1710,7 @@ function newProfile(hadSaved) {
   if (!S.av) S.av = AVK[Math.floor(Math.random() * AVK.length)];
   if (INVITE && INVITE.id) S.id = INVITE.id;
   if (INVITE && INVITE.n && !S.nm) S.nm = INVITE.n;
-  render(`<section class="pform"><p class="eyebrow">Étape 1 sur 2</p><h1>${S.nm ? `${esc(S.nm)}, crée ton profil` : "Crée ton profil"}</h1>${INVITE && INVITE.id ? `<p class="lead">Ton invitation est reconnue : ton code testeur est déjà rempli.</p>` : ""}
+  render(`<section class="pform"><p class="eyebrow">Étape 2 sur 3</p><h1>${S.nm ? `${esc(S.nm)}, crée ton profil` : "Crée ton profil"}</h1>${INVITE && INVITE.id ? `<p class="lead">Ton invitation est reconnue : ton code testeur est déjà rempli.</p>` : ""}
   <div><p class="lbl">Ton avatar</p><div class="avs">${AVK.map((k, i) => `<button class="avb" data-av="${k}" aria-pressed="${k === S.av}" aria-label="Avatar ${i + 1}">${avatarSVG(k)}</button>`).join("")}</div></div>
   <label class="f" for="fid">Ton code testeur, donné par le coordinateur (ou garde celui-ci)<input type="text" id="fid" maxlength="16" value="${esc(S.id)}" autocomplete="off"></label>
   <div><p class="lbl">Ton âge</p><div class="chips2" data-g="age">${AGES.map((a) => `<button data-v="${a}" aria-pressed="${S.age === a}">${a}</button>`).join("")}</div></div>
@@ -1676,7 +1724,7 @@ function newProfile(hadSaved) {
   $("#pback").onclick = () => whoWatches();
 }
 function pacte() {
-  render(`<section class="pacte"><p class="eyebrow">Étape 2 sur 2</p><div class="rt"><b>16+</b><span>Avant de regarder</span></div><h1>Cette série contient un vrai piège.</h1><p>Pendant l'épisode, BONGO essaiera de te piéger une fois, sous un visage que tu connais. Rien ne te sera demandé : ni argent, ni donnée personnelle. Sois sur tes gardes.</p><div class="warn"><span>Rumeurs et faux documents</span><span>Pression du groupe</span><span>Chronomètres</span><span>Un piège réel</span></div><label class="check" for="fpact"><input type="checkbox" id="fpact"><span>J'accepte le pacte BONGO</span></label><button class="btn gold wide" id="start" disabled>Entrer dans BONGO</button><p class="small">Les personnes, entreprises et comptes de cet épisode sont fictifs. Écouteurs conseillés. Si ton téléphone n'a pas de voix française, les sous-titres suffisent.</p></section>`);
+  render(`<section class="pacte"><p class="eyebrow">Étape 3 sur 3</p><div class="rt"><b>16+</b><span>Avant de regarder</span></div><h1>Cette série contient un vrai piège.</h1><p>Pendant l'épisode, BONGO essaiera de te piéger une fois, sous un visage que tu connais. Rien ne te sera demandé : ni argent, ni donnée personnelle. Sois sur tes gardes.</p><div class="warn"><span>Rumeurs et faux documents</span><span>Pression du groupe</span><span>Chronomètres</span><span>Un piège réel</span></div><label class="check" for="fpact"><input type="checkbox" id="fpact"><span>J'accepte le pacte BONGO</span></label><button class="btn gold wide" id="start" disabled>Entrer dans BONGO</button><p class="small">Les personnes, entreprises et comptes de cet épisode sont fictifs. Écouteurs conseillés. Si ton téléphone n'a pas de voix française, les sous-titres suffisent.</p></section>`);
   $("#fpact").onchange = () => { $("#start").disabled = !$("#fpact").checked; };
   $("#start").onclick = () => { S.pact = 1; save(); sfx("sting"); home(); };
 }
@@ -1694,12 +1742,14 @@ function home() {
   mode("browse"); hush(); setPaused(false); $("#meAv").innerHTML = avatarSVG(S.av);
   const started = !!S.t0 && S.step !== "accueil" && !S.done, c = CH[S.step], met = metTraps();
   render(`<section class="bill" id="billtop"><div class="bill-blur"><div class="art">${BILL()}</div></div><div class="bill-stage"><div class="in">${BILL()}</div></div><div class="bill-fade"></div><div class="bill-in">${S.nm ? `<p class="hello">${greetWord()} ${esc(S.nm)}, ton épisode t'attend.</p>` : ""}<p class="series">${logoIcon(26)}<span>Série</span></p><div class="bill-title">${ransom("TROIS SECONDES", 5)}</div><p class="meta"><span class="new">Nouveau</span><span>2026</span><span class="age">16+</span><span>Saison 1 · Épisode 1</span><span>≈ 25 min</span><span class="free">3 épisodes gratuits</span></p><p class="bill-tag">Un audio. Sept secondes. Ta famille panique, et ton pouce est déjà sur « Transférer ».</p>${started ? `<div class="resume"><div class="rbar"><i style="width:${progPct()}%"></i></div><span>Reprendre à : ${esc(c ? c[0] + " · " + c[1] : "")}</span></div>` : ""}<div class="bill-btns"><button class="btn" id="play">${ICON.play}${playLabel()}</button><button class="btn ghost" id="info">${ICON.info}Plus d'infos</button></div></div></section>
+  <section class="mcard"><div><p class="eyebrow">Ta mission de testeur</p><p>Regarder l'épisode 1 en entier, donner ton avis en dix questions, renvoyer ton code de résultats.</p></div><button class="btn ghost" id="mrev" type="button">Revoir ma mission</button></section>
   <section class="rail" id="railS1"><h3>Saison 1 · Ne te fais plus avoir <small>6 épisodes · les 3 premiers gratuits</small></h3><div class="rscroll">${EPS.map(epPoster).join("")}</div></section>
   <section class="rail" id="railTraps"><h3>Les douze pièges à collectionner <small>${met.length} sur 12 débloqué${met.length > 1 ? "s" : ""}</small></h3><div class="rscroll">${Object.keys(TRAPS).map((k, i) => trapTile(k, i, met)).join("")}</div></section>
   <footer class="foot"><p>Pilote privé destiné au panel de test. Les personnes, entreprises et comptes de cet épisode sont fictifs.</p><p id="coordLink" hidden><a href="#coordination">Espace coordinateur du panel</a></p></footer>`);
   isOwner().then((ok) => { const c = $("#coordLink"); if (ok && c) c.hidden = false; });
   $("#play").onclick = () => play();
   $("#info").onclick = () => details(1);
+  $("#mrev").onclick = () => missionSheet();
   $$(".poster[data-ep]").forEach((p) => (p.onclick = () => details(+p.dataset.ep)));
 }
 function play() {
