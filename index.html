@@ -482,7 +482,7 @@ body.mode-gate #view{min-height:100vh;min-height:100dvh;display:grid;place-items
 .chips2 button{border:1.5px solid var(--line);background:rgba(255,255,255,.05);color:#fff;border-radius:99px;padding:8px 14px;font-size:14px;font-weight:600}
 .chips2 button[aria-pressed="true"]{background:#fff;color:var(--navy);border-color:#fff}
 label.f{display:grid;gap:8px;font-size:13px;font-weight:600;color:var(--dim)}
-input[type=text],input[type=email],textarea,select{background:rgba(255,255,255,.07);border:1.5px solid var(--line);border-radius:10px;color:#fff;padding:12px 13px;font:inherit;font-size:16px;width:100%}
+input[type=text],input[type=email],input[type=tel],textarea,select{background:rgba(255,255,255,.07);border:1.5px solid var(--line);border-radius:10px;color:#fff;padding:12px 13px;font:inherit;font-size:16px;width:100%}
 textarea{min-height:90px;resize:vertical}
 input::placeholder,textarea::placeholder{color:rgba(191,200,255,.45)}
 .pacte{display:grid;gap:18px;text-align:left;width:100%;max-width:520px;animation:fadeUp .5s both}
@@ -581,6 +581,16 @@ input::placeholder,textarea::placeholder{color:rgba(191,200,255,.45)}
 .opt-group button[aria-pressed="true"]{background:var(--yellow);color:var(--navy);border-color:var(--yellow)}
 .nums button{min-width:38px;padding:7px 0}
 .code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;word-break:break-all;background:rgba(255,255,255,.06);border:1.5px solid var(--line);border-radius:12px;padding:10px;max-height:150px;overflow:auto;user-select:all;color:var(--lilac)}
+.lhead{display:none;grid-template-columns:1fr 1fr 1.6fr 1.2fr 34px;gap:6px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:0 2px}
+.lrows{display:grid;gap:8px}
+.lrow{display:grid;grid-template-columns:1fr 1fr 34px;gap:6px;padding:8px;border:1.5px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03)}
+.lrow .lf{padding:9px 10px;font-size:15px;border-radius:9px;min-width:0}
+.lrow .lf[data-f="email"]{grid-column:1/3}.lrow .lf[data-f="phone"]{grid-column:1/3}
+.lrow .lx{grid-row:1;grid-column:3;border:0;background:rgba(255,255,255,.08);color:var(--lilac);border-radius:9px;font-size:18px;padding:0}
+@media (min-width:640px){.lhead{display:grid}.lrow{grid-template-columns:1fr 1fr 1.6fr 1.2fr 34px;padding:0;border:0;background:none}.lrow .lf[data-f="email"],.lrow .lf[data-f="phone"]{grid-column:auto}.lrow .lx{grid-row:auto;grid-column:auto}}
+.ltools{display:flex;flex-wrap:wrap;gap:8px}
+.ltools .btn{padding:10px 14px;font-size:14px}
+.ibar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px;padding-bottom:6px;border-bottom:1px solid var(--line)}
 .inv-row{display:grid;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
 .inv-row .who{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
 .inv-row .who b{font-size:15px;word-break:break-all}
@@ -1794,74 +1804,190 @@ async function coordination() {
 const INV_KEY = "bongo-invites-v1";
 const invites = new Map();
 let invSub = null;
-const invKey = (email) => email.toLowerCase().replace(/[^a-z0-9]/g, "_").slice(0, 80);
+const invKey = (k) => String(k).toLowerCase().replace(/[^a-z0-9]/g, "_").slice(0, 80);
+const keyOfInv = (i) => i.email ? i.email : "tel:" + i.phone;
 const PUBLIC_MODE = () => /^https?:/.test(PUBLIC_URL) || HOSTED;
+const XLSX_URL = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+const TEMPLATE_FILE = "modele-invitations-bongo.xlsx";
+const EMAIL_RE = /[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}/;
+let xlsxP = null;
+function loadXLSX() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (!xlsxP) xlsxP = new Promise((res, rej) => { const s = document.createElement("script"); s.src = XLSX_URL; s.onload = () => (window.XLSX ? res(window.XLSX) : rej(new Error("xlsx"))); s.onerror = () => { xlsxP = null; rej(new Error("xlsx")); }; document.head.appendChild(s); });
+  return xlsxP;
+}
+function normPhone(t) {
+  let d = String(t || "").replace(/[^\d+]/g, ""); if (!d) return "";
+  if (d.startsWith("+")) d = d.slice(1); else if (d.startsWith("00")) d = d.slice(2); else if (/^0\d{9}$/.test(d)) d = "243" + d.slice(1); else if (/^[89]\d{8}$/.test(d)) d = "243" + d;
+  return /^\d{9,15}$/.test(d) ? d : "";
+}
+const fmtPhone = (p) => (p ? "+" + p : "");
+function templateHref() { return publicBase().startsWith("https://claude.ai") ? "" : publicBase().replace(/[^/]*$/, "") + TEMPLATE_FILE; }
+
+/* --- Carte d'invitation --- */
 function inviteCardHTML() {
   let sig = "David Fidami", rep = ""; try { sig = localStorage.getItem("bongo-invsig") || sig; rep = localStorage.getItem("bongo-invrep") || ""; } catch (e) {}
   const steps = PUBLIC_MODE()
-    ? `<p>Saisis le prénom et l'adresse de chaque testeur : BONGO lui attribue un code et crée son lien personnel, déjà rempli.</p><p>Envoie l'invitation par e-mail ou sur WhatsApp. Aucun compte n'est nécessaire : le lien s'ouvre sur n'importe quel téléphone.</p><p>Le testeur te renvoie son code de résultats ; colle-le plus bas pour l'ajouter au tableau.</p>`
-    : `<p>Sur claude.ai, depuis le web ou l'application de bureau, ouvre le menu <b>Partager</b> de cette page et invite l'adresse du testeur, ou choisis « Quiconque dispose du lien ».</p><p>Saisis ici le prénom et l'adresse : BONGO attribue un code testeur et prépare l'e-mail d'invitation en français.</p><p>Le testeur te renvoie son code de résultats ; colle-le plus bas pour l'ajouter au tableau.</p>`;
+    ? `<p>Remplis la liste ci-dessous, colle-la depuis Excel, ou importe ton fichier Excel. Une ligne par testeur : prénom, nom, e-mail et numéro WhatsApp. L'e-mail ou le numéro suffit.</p><p>Appuie sur « Créer les invitations » : chaque testeur reçoit un code et un lien personnel, déjà rempli, qui s'ouvre sans compte.</p><p>Envoie chaque invitation par e-mail ou WhatsApp, ou télécharge la liste complète en Excel.</p>`
+    : `<p>Sur claude.ai, ouvre le menu <b>Partager</b> de cette page et invite l'adresse du testeur, ou choisis « Quiconque dispose du lien ».</p><p>Remplis la liste ci-dessous ou importe ton fichier Excel : BONGO attribue un code à chaque testeur et prépare son invitation en français.</p><p>Le testeur te renvoie son code de résultats ; colle-le plus bas pour l'ajouter au tableau.</p>`;
+  const tpl = templateHref();
   return `<section class="card" id="invcard"><p class="eyebrow">Inviter des testeurs</p><h2 style="font-size:26px">Invitations personnelles</h2>
   <div class="steps">${steps}</div>
   ${PUBLIC_MODE() ? `<p class="small">Adresse publique du pilote : <b style="color:#fff;word-break:break-all">${esc(publicBase())}</b></p>` : ""}
-  <label class="f" for="iem">Testeurs, un par ligne : prénom et adresse e-mail<textarea id="iem" placeholder="Grâce Mbuyi, grace.mbuyi@gmail.com&#10;junior.k@yahoo.fr"></textarea></label>
+  <div class="lhead" aria-hidden="true"><span>Prénom</span><span>Nom</span><span>E-mail</span><span>WhatsApp</span><span></span></div>
+  <div id="lrows" class="lrows"></div>
+  <div class="ltools"><button class="btn ghost" id="laddrows" type="button">+ 5 lignes</button><label class="btn ghost" for="lfile" tabindex="0" id="lfilebtn">Importer un fichier Excel</label><input type="file" id="lfile" accept=".xlsx,.xls,.csv,.txt" hidden>${tpl ? `<a class="btn ghost" href="${esc(tpl)}" target="_blank" rel="noopener" download>Modèle Excel à remplir</a>` : ""}<button class="btn ghost" id="lclear" type="button">Vider la liste</button></div>
+  <p class="small">Astuce : copie tes colonnes dans Excel ou Google Sheets, puis colle-les dans la première case « Prénom » : toutes les lignes se remplissent d'un coup.</p>
   <label class="f" for="isig">Signature de l'invitation<input type="text" id="isig" maxlength="60" value="${esc(sig)}"></label>
   <label class="f" for="irep">Adresse e-mail où les testeurs renvoient leurs résultats (facultatif)<input type="email" id="irep" maxlength="80" value="${esc(rep)}" placeholder="ton.adresse@exemple.com"></label>
-  <button class="btn gold wide" id="iadd">Créer les invitations</button><p class="status" id="ist" role="status"></p><div id="ilist"></div></section>`;
+  <button class="btn gold wide" id="iadd" disabled>Créer les invitations</button><p class="status" id="ist" role="status"></p><div id="ilist"></div></section>`;
 }
+
+/* --- Liste éditable --- */
+function rowHTML(r = {}) {
+  return `<div class="lrow"><input type="text" class="lf" data-f="first" placeholder="Prénom" aria-label="Prénom" value="${esc(r.first || "")}" autocomplete="off"><input type="text" class="lf" data-f="last" placeholder="Nom" aria-label="Nom" value="${esc(r.last || "")}" autocomplete="off"><input type="email" class="lf" data-f="email" placeholder="E-mail" aria-label="E-mail" value="${esc(r.email || "")}" autocomplete="off"><input type="tel" class="lf" data-f="phone" placeholder="WhatsApp" aria-label="Numéro WhatsApp" value="${esc(r.phone || "")}" autocomplete="off"><button class="lx" type="button" aria-label="Supprimer la ligne">×</button></div>`;
+}
+function readRows() { return $$("#lrows .lrow").map((el) => { const o = {}; $$(".lf", el).forEach((i) => (o[i.dataset.f] = i.value.trim())); return o; }); }
+function validRows() { return readRows().map((r) => ({ first: r.first, last: r.last, email: (r.email.match(EMAIL_RE) || [""])[0].toLowerCase(), phone: normPhone(r.phone) })).filter((r) => r.email || r.phone); }
+function updCount() { const n = validRows().length, b = $("#iadd"); if (!b) return; b.disabled = !n; b.textContent = n ? `Créer ${n} invitation${n > 1 ? "s" : ""}` : "Créer les invitations"; }
+function setRows(list, append) {
+  const box = $("#lrows"); if (!box) return;
+  const kept = append ? readRows().filter((r) => r.first || r.last || r.email || r.phone) : [];
+  const all = [...kept, ...list]; while (all.length < 5) all.push({});
+  box.innerHTML = all.map(rowHTML).join(""); wireRows(); updCount();
+}
+function wireRows() {
+  $$("#lrows .lx").forEach((b) => (b.onclick = () => { b.parentElement.remove(); if ($$("#lrows .lrow").length < 1) setRows([], false); updCount(); }));
+  $$("#lrows .lf").forEach((i) => {
+    i.oninput = updCount;
+    i.onpaste = (ev) => {
+      const t = (ev.clipboardData || window.clipboardData).getData("text"); if (!/[\t\n]/.test(t)) return;
+      ev.preventDefault();
+      const before = readRows(), rowEl = i.closest(".lrow"), idx = $$("#lrows .lrow").indexOf(rowEl);
+      const parsed = rowsFromMatrix(matrixFromText(t), true);
+      const head = before.slice(0, idx).filter((r) => r.first || r.last || r.email || r.phone), tail = before.slice(idx + 1).filter((r) => r.first || r.last || r.email || r.phone);
+      setRows([...head, ...parsed, ...tail], false);
+      $("#ist").textContent = parsed.length ? `${parsed.length} ligne${parsed.length > 1 ? "s" : ""} collée${parsed.length > 1 ? "s" : ""}.` : "Rien de reconnu dans le texte collé : il faut au moins un e-mail ou un numéro par ligne.";
+    };
+  });
+}
+function matrixFromText(t) { return String(t || "").replace(/\r/g, "").split("\n").map((l) => (l.includes("\t") ? l.split("\t") : l.split(/[;,]/))); }
+function rowsFromMatrix(m, loose) {
+  m = (m || []).map((r) => (r || []).map((c) => String(c == null ? "" : c).trim())).filter((r) => r.some(Boolean));
+  if (!m.length) return [];
+  const h = m[0].map((c) => c.toLowerCase()), find = (re) => h.findIndex((c) => re.test(c));
+  const iN = find(/^nom complet|^nom et pr[ée]nom|^pr[ée]nom et nom|^name$|^full ?name/);
+  const iF = iN >= 0 ? -1 : find(/pr[ée]nom|first/), iL = find(/^nom$|^nom de famille|^last|surname|^postnom/), iE = find(/e-?mail|courriel|^mail|adresse/), iP = find(/t[ée]l|whats|phone|num[ée]ro|portable|gsm|mobile/);
+  const hasHead = [iN, iF, iL, iE, iP].some((x) => x >= 0) && !m[0].some((c) => EMAIL_RE.test(c));
+  const out = []; let pending = null;
+  (hasHead ? m.slice(1) : m).forEach((r) => {
+    let first = "", last = "", email = "", phone = "";
+    if (hasHead) {
+      first = iF >= 0 ? r[iF] || "" : ""; last = iL >= 0 ? r[iL] || "" : "";
+      if (iN >= 0 && r[iN]) { const p = r[iN].split(/\s+/); first = p.shift() || ""; last = last || p.join(" "); }
+      email = iE >= 0 ? ((r[iE] || "").match(EMAIL_RE) || [""])[0] : ""; phone = iP >= 0 ? r[iP] || "" : "";
+    } else {
+      const names = [];
+      r.forEach((c) => { const em = c.match(EMAIL_RE); if (em && !email) email = em[0]; else if (!phone && /\d{6,}/.test(c.replace(/[\s.\-()]/g, "")) && normPhone(c)) phone = c; else if (c) names.push(c); });
+      first = names[0] || ""; last = names.slice(1).join(" ");
+      if (names.length === 1 && /\s/.test(first)) { const p = first.split(/\s+/); first = p.shift(); last = p.join(" "); }
+    }
+    if (!email && !normPhone(phone)) { if (first || last) pending = { first, last }; return; }
+    if (!first && !last && pending) { first = pending.first; last = pending.last; }
+    pending = null;
+    out.push({ first, last, email: email.toLowerCase(), phone: loose ? phone : normPhone(phone) });
+  });
+  return out;
+}
+async function importFile(file) {
+  const st = $("#ist"); st.textContent = `Lecture de « ${file.name} »…`;
+  try {
+    let m;
+    if (/\.(csv|txt)$/i.test(file.name)) { const t = await file.text(); m = matrixFromText(t.replace(/^﻿/, "")); }
+    else { const X = await loadXLSX(); const wb = X.read(await file.arrayBuffer(), { type: "array" }); const name = wb.SheetNames.find((n) => /testeur|invit|liste/i.test(n)) || wb.SheetNames[0]; m = X.utils.sheet_to_json(wb.Sheets[name], { header: 1, raw: false, defval: "" }); }
+    const rows = rowsFromMatrix(m, true);
+    setRows(rows, true);
+    st.textContent = rows.length ? `${rows.length} testeur${rows.length > 1 ? "s" : ""} importé${rows.length > 1 ? "s" : ""} depuis « ${file.name} ». Vérifie la liste, puis crée les invitations.` : `Aucun testeur reconnu dans « ${file.name} » : il faut une colonne E-mail ou WhatsApp.`;
+  } catch (e) { st.textContent = "Impossible de lire ce fichier. Enregistre-le en .xlsx ou en .csv, ou copie-colle ses colonnes dans la liste."; }
+}
+
+/* --- Messages --- */
 function newCode() { const used = new Set([...invites.values()].map((i) => i.code)); let c; do { c = "T-" + String(1000 + Math.floor(Math.random() * 9000)); } while (used.has(c)); return c; }
 const replyAddr = () => { const v = ($("#irep") && $("#irep").value.trim()) || ""; return /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(v) ? v : ""; };
 function invMail(inv) {
   const sig = ($("#isig") && $("#isig").value.trim()) || "L'équipe BONGO";
   const first = inv.name ? inv.name.split(" ")[0] : "";
+  const link = PUBLIC_MODE() ? inviteLink(inv, replyAddr()) : ARTIFACT_URL;
   const subject = "Invitation · Pilote BONGO, épisode 1 « Trois secondes »";
   const intro = [`Bonjour${first ? " " + first : ""},`, "", "Tu es invité(e) à tester en avant-première l'épisode 1 de BONGO, l'Académie de l'esprit critique. Compte environ 25 minutes, avec des écouteurs si possible.", ""];
   const steps = PUBLIC_MODE()
-    ? [`1. Ouvre ton lien personnel, sur ton téléphone ou ton ordinateur : ${inviteLink(inv, replyAddr())}`, `2. Ton code testeur est déjà rempli. Si on te demande ton code d'invitation, saisis : ${inviteCode(inv.code)}`, "3. À la fin de l'épisode, renvoie ton code de résultats en réponse à cet e-mail, ou sur WhatsApp."]
-    : [`1. Ouvre ce lien : ${ARTIFACT_URL}`, `2. Connecte-toi à Claude avec cette adresse e-mail : ${inv.email}. Si tu n'as pas encore de compte Claude, crée-le gratuitement avec cette même adresse, sinon le lien ne s'ouvrira pas. Tu recevras aussi un e-mail d'invitation de Claude, en anglais : c'est normal.`, `3. Choisis « Nouveau testeur » et saisis ton code testeur : ${inv.code}`, "4. À la fin de l'épisode, copie ton code de résultats et renvoie-le en réponse à cet e-mail, ou sur WhatsApp."];
+    ? [`1. Ouvre ton lien personnel, sur ton téléphone ou ton ordinateur : ${link}`, `2. Ton code testeur est déjà rempli. Si on te demande ton code d'invitation, saisis : ${inviteCode(inv.code)}`, "3. À la fin de l'épisode, renvoie ton code de résultats en réponse à cet e-mail, ou sur WhatsApp."]
+    : [`1. Ouvre ce lien : ${ARTIFACT_URL}`, `2. Connecte-toi à Claude avec cette adresse e-mail : ${inv.email}. Si tu n'as pas encore de compte Claude, crée-le gratuitement avec cette même adresse, sinon le lien ne s'ouvrira pas.`, `3. Choisis « Nouveau testeur » et saisis ton code testeur : ${inv.code}`, "4. À la fin de l'épisode, copie ton code de résultats et renvoie-le en réponse à cet e-mail, ou sur WhatsApp."];
   const body = [...intro, ...steps, "", "Les personnes, entreprises et comptes de l'épisode sont fictifs. Rien ne te sera demandé : ni argent, ni donnée personnelle.", "", "Merci pour ton aide,", sig].join("\n");
-  const wa = [`Bonjour${first ? " " + first : ""} ! Tu es invité(e) à tester l'épisode 1 de BONGO, l'Académie de l'esprit critique (25 min, écouteurs conseillés).`, "", `Ton lien personnel : ${PUBLIC_MODE() ? inviteLink(inv, replyAddr()) : ARTIFACT_URL}`, `Ton code d'invitation : ${inviteCode(inv.code)}`, "", "À la fin, renvoie-moi ton code de résultats ici.", sig].join("\n");
-  return { subject, body, href: `mailto:${inv.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, wa: `https://wa.me/?text=${encodeURIComponent(wa)}`, link: PUBLIC_MODE() ? inviteLink(inv, replyAddr()) : ARTIFACT_URL };
+  const waText = [`Bonjour${first ? " " + first : ""} ! Tu es invité(e) à tester l'épisode 1 de BONGO, l'Académie de l'esprit critique (25 min, écouteurs conseillés).`, "", `Ton lien personnel : ${link}`, `Ton code d'invitation : ${inviteCode(inv.code)}`, "", "À la fin, renvoie-moi ton code de résultats ici.", sig].join("\n");
+  return { subject, body, href: inv.email ? `mailto:${inv.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}` : "", wa: `https://wa.me/${inv.phone || ""}?text=${encodeURIComponent(waText)}`, waText, link };
 }
 function saveInvites() { try { localStorage.setItem(INV_KEY, JSON.stringify([...invites.values()])); } catch (e) {} }
-async function copyText(txt, ok) { try { await navigator.clipboard.writeText(txt); $("#ist").textContent = ok; } catch (e) { $("#ist").textContent = "Le navigateur a bloqué la copie : utilise plutôt les boutons d'envoi."; } }
+async function copyText(txt, ok) { try { await navigator.clipboard.writeText(txt); $("#ist").textContent = ok; } catch (e) { $("#ist").textContent = "Le navigateur a bloqué la copie : utilise plutôt les boutons d'envoi ou le téléchargement."; } }
+
+/* --- Export de la liste --- */
+function exportRows() {
+  const got = new Set([...coordRows.values()].map((r) => String(r.id || "")));
+  return [...invites.values()].sort((a, b) => a.at - b.at).map((i) => { const m = invMail(i), parts = (i.name || "").split(" "); return { "Prénom": parts[0] || "", "Nom": parts.slice(1).join(" "), "E-mail": i.email || "", "WhatsApp": fmtPhone(i.phone), "Code testeur": i.code, "Code d'invitation": inviteCode(i.code), "Lien personnel": m.link, "Statut": got.has(i.code) ? "Résultat reçu" : "En attente", "Invité le": new Date(i.at).toLocaleDateString("fr-FR"), "Message WhatsApp": m.waText }; });
+}
+async function downloadList() {
+  const rows = exportRows(); if (!rows.length) return;
+  const name = `invitations-bongo-${new Date().toISOString().slice(0, 10)}`;
+  try { const X = await loadXLSX(); const ws = X.utils.json_to_sheet(rows); ws["!cols"] = [12, 16, 28, 18, 12, 16, 60, 14, 12, 60].map((w) => ({ wch: w })); const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, "Invitations"); X.writeFile(wb, name + ".xlsx"); $("#ist").textContent = `Liste téléchargée : ${name}.xlsx`; }
+  catch (e) {
+    const cols = Object.keys(rows[0]), q = (v) => `"${String(v).replace(/"/g, '""')}"`;
+    const csv = "﻿" + [cols.map(q).join(";"), ...rows.map((r) => cols.map((c) => q(r[c])).join(";"))].join("\r\n");
+    try { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = name + ".csv"; document.body.appendChild(a); a.click(); a.remove(); $("#ist").textContent = `Liste téléchargée : ${name}.csv`; }
+    catch (err) { copyAll(); }
+  }
+}
+function copyAll() { const rows = exportRows(); if (!rows.length) return; const cols = Object.keys(rows[0]).filter((c) => c !== "Message WhatsApp"); copyText([cols.join("\t"), ...rows.map((r) => cols.map((c) => String(r[c]).replace(/\s+/g, " ")).join("\t"))].join("\n"), `${rows.length} invitation${rows.length > 1 ? "s" : ""} copiée${rows.length > 1 ? "s" : ""} : colle-les dans Excel ou Google Sheets.`); }
+
+/* --- Liste des invitations créées --- */
 function renderInvites() {
   const box = $("#ilist"); if (!box) return;
   const list = [...invites.values()].sort((a, b) => b.at - a.at);
   const got = new Set([...coordRows.values()].map((r) => String(r.id || "")));
   const nOk = list.filter((i) => got.has(i.code)).length;
-  box.innerHTML = list.length ? `<p class="lbl" style="margin:14px 0 0">${list.length} invitation${list.length > 1 ? "s" : ""} · ${nOk} résultat${nOk > 1 ? "s" : ""} reçu${nOk > 1 ? "s" : ""}</p>` + list.map((i) => { const m = invMail(i), ok = got.has(i.code); return `<div class="inv-row"><div class="who"><b>${esc(i.name ? i.name + " · " : "")}${esc(i.email)}</b><span class="st ${ok ? "ok" : "wait"}">${ok ? "Résultat reçu" : "En attente"}</span></div><div class="who"><span class="code2">${esc(inviteCode(i.code))}</span><span class="small">invité le ${new Date(i.at).toLocaleDateString("fr-FR")}</span></div><div class="acts"><a class="btn gold" href="${esc(m.href)}" target="_blank" rel="noopener">Envoyer l'e-mail</a><a class="btn ghost" href="${esc(m.wa)}" target="_blank" rel="noopener">WhatsApp</a><button class="btn ghost" data-link="${esc(i.email)}">Copier le lien</button><button class="btn ghost" data-copy="${esc(i.email)}">Copier le texte</button><button class="btn ghost" data-del="${esc(i.email)}" aria-label="Retirer ${esc(i.email)}">Retirer</button></div></div>`; }).join("") : `<p class="small" style="margin-top:10px">Aucune invitation pour l'instant.</p>`;
-  $$("[data-copy]", box).forEach((b) => (b.onclick = () => { const i = invites.get(b.dataset.copy); if (!i) return; const m = invMail(i); copyText(`Objet : ${m.subject}\n\n${m.body}`, `Invitation de ${i.email} copiée : colle-la dans ta messagerie.`); }));
-  $$("[data-link]", box).forEach((b) => (b.onclick = () => { const i = invites.get(b.dataset.link); if (!i) return; copyText(invMail(i).link, `Lien personnel de ${i.email} copié.`); }));
+  box.innerHTML = list.length ? `<div class="ibar"><p class="lbl" style="margin:0">${list.length} invitation${list.length > 1 ? "s" : ""} · ${nOk} résultat${nOk > 1 ? "s" : ""} reçu${nOk > 1 ? "s" : ""}</p><div class="ltools"><button class="btn gold" id="idl" type="button">Télécharger la liste (Excel)</button><button class="btn ghost" id="icp" type="button">Copier tout</button></div></div>` + list.map((i) => { const m = invMail(i), ok = got.has(i.code), k = keyOfInv(i); return `<div class="inv-row"><div class="who"><b>${esc(i.name || "Sans prénom")}</b><span class="st ${ok ? "ok" : "wait"}">${ok ? "Résultat reçu" : "En attente"}</span></div><div class="who"><span class="small" style="word-break:break-all">${esc([i.email, fmtPhone(i.phone)].filter(Boolean).join(" · "))}</span></div><div class="who"><span class="code2">${esc(inviteCode(i.code))}</span><span class="small">invité le ${new Date(i.at).toLocaleDateString("fr-FR")}</span></div><div class="acts">${m.href ? `<a class="btn gold" href="${esc(m.href)}" target="_blank" rel="noopener">E-mail</a>` : ""}<a class="btn ${m.href ? "ghost" : "gold"}" href="${esc(m.wa)}" target="_blank" rel="noopener">WhatsApp</a><button class="btn ghost" data-link="${esc(k)}" type="button">Copier le lien</button>${m.href ? `<button class="btn ghost" data-copy="${esc(k)}" type="button">Copier l'e-mail</button>` : ""}<button class="btn ghost" data-del="${esc(k)}" type="button" aria-label="Retirer ${esc(i.name || k)}">Retirer</button></div></div>`; }).join("") : `<p class="small" style="margin-top:10px">Aucune invitation pour l'instant.</p>`;
+  const dl = $("#idl"); if (dl) dl.onclick = downloadList; const cp = $("#icp"); if (cp) cp.onclick = copyAll;
+  $$("[data-copy]", box).forEach((b) => (b.onclick = () => { const i = invites.get(b.dataset.copy); if (!i) return; const m = invMail(i); copyText(`Objet : ${m.subject}\n\n${m.body}`, `Invitation de ${i.name || i.email} copiée : colle-la dans ta messagerie.`); }));
+  $$("[data-link]", box).forEach((b) => (b.onclick = () => { const i = invites.get(b.dataset.link); if (!i) return; copyText(invMail(i).link, `Lien personnel de ${i.name || i.email || fmtPhone(i.phone)} copié.`); }));
   $$("[data-del]", box).forEach((b) => (b.onclick = async () => { const k = b.dataset.del; invites.delete(k); saveInvites(); if (dbRef && canSave) { try { await dbRef.collection("invites").doc(invKey(k)).delete(); } catch (e) {} } renderInvites(); }));
 }
-function parseInvites(text) {
-  const out = [], re = /[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}/g;
-  let pending = "";
-  String(text || "").split(/[\n;]+/).forEach((line) => { const ems = line.match(re) || []; const clean = (t) => t.replace(/[<>,:()"']/g, " ").replace(/\s+/g, " ").trim().slice(0, 40); if (!ems.length) { pending = clean(line); return; } let name = ems.length === 1 ? clean(line.replace(ems[0], " ")) : ""; if (!name && pending) name = pending; pending = ""; ems.forEach((em) => out.push({ email: em.toLowerCase(), name })); });
-  return out;
-}
 function initInvites() {
-  try { JSON.parse(localStorage.getItem(INV_KEY) || "[]").forEach((i) => { if (i && i.email && i.code) invites.set(i.email, i); }); } catch (e) {}
+  try { JSON.parse(localStorage.getItem(INV_KEY) || "[]").forEach((i) => { if (i && (i.email || i.phone) && i.code) invites.set(keyOfInv(i), i); }); } catch (e) {}
+  setRows([], false);
+  $("#laddrows").onclick = () => { $("#lrows").insertAdjacentHTML("beforeend", Array.from({ length: 5 }, () => rowHTML()).join("")); wireRows(); };
+  $("#lclear").onclick = () => { setRows([], false); $("#ist").textContent = ""; };
+  $("#lfile").onchange = (ev) => { const f = ev.target.files && ev.target.files[0]; if (f) importFile(f); ev.target.value = ""; };
+  $("#lfilebtn").onkeydown = (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); $("#lfile").click(); } };
   $("#isig").oninput = () => { try { localStorage.setItem("bongo-invsig", $("#isig").value); } catch (e) {} renderInvites(); };
   $("#irep").oninput = () => { try { localStorage.setItem("bongo-invrep", $("#irep").value); } catch (e) {} renderInvites(); };
   $("#iadd").onclick = async () => {
-    const found = parseInvites($("#iem").value); let added = 0;
+    const found = validRows(); let added = 0, dup = 0;
     for (const f of found) {
-      if (invites.has(f.email)) { const old = invites.get(f.email); if (f.name && !old.name) old.name = f.name; continue; }
-      const inv = { email: f.email, name: f.name, code: newCode(), at: Date.now() }; invites.set(f.email, inv); added++;
-      if (dbRef && canSave) { try { await dbRef.collection("invites").doc(invKey(f.email)).set(inv); } catch (e) {} }
+      const name = [f.first, f.last].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 60), k = f.email || "tel:" + f.phone;
+      if (invites.has(k)) { dup++; const old = invites.get(k); if (name && !old.name) old.name = name; if (f.phone && !old.phone) old.phone = f.phone; continue; }
+      const inv = { email: f.email, phone: f.phone, name, code: newCode(), at: Date.now() + added }; invites.set(k, inv); added++;
+      if (dbRef && canSave) { try { await dbRef.collection("invites").doc(invKey(k)).set(inv); } catch (e) {} }
     }
-    saveInvites(); $("#iem").value = ""; renderInvites();
-    $("#ist").textContent = found.length ? `${added} invitation${added > 1 ? "s" : ""} créée${added > 1 ? "s" : ""}${found.length > added ? ` (${found.length - added} déjà invitée${found.length - added > 1 ? "s" : ""})` : ""}. ${PUBLIC_MODE() ? "Envoie chaque invitation par e-mail ou sur WhatsApp." : "Ouvre chaque e-mail pour l'envoyer, et invite aussi l'adresse dans le menu Partager."}` : "Aucune adresse e-mail reconnue.";
+    saveInvites(); setRows([], false); renderInvites();
+    $("#ist").textContent = found.length ? `${added} invitation${added > 1 ? "s" : ""} créée${added > 1 ? "s" : ""}${dup ? ` (${dup} déjà invitée${dup > 1 ? "s" : ""})` : ""}. Envoie-les une par une ci-dessous, ou télécharge la liste complète en Excel.` : "Aucune ligne valable : il faut au moins un e-mail ou un numéro WhatsApp par testeur.";
+    const ib = $("#ilist"); if (ib) ib.scrollIntoView({ behavior: "smooth", block: "start" });
   };
   renderInvites(); syncInvites();
 }
 function syncInvites() {
   if (!dbRef || !canSave || invSub) return;
   try {
-    [...invites.values()].forEach((i) => { dbRef.collection("invites").doc(invKey(i.email)).set(i).catch(() => {}); });
-    invSub = dbRef.collection("invites").onSnapshot((snap) => { snap.docs.forEach((d) => { const x = d.data(); if (x && x.email && x.code) invites.set(x.email, x); }); saveInvites(); renderInvites(); }, () => {});
+    [...invites.values()].forEach((i) => { dbRef.collection("invites").doc(invKey(keyOfInv(i))).set(i).catch(() => {}); });
+    invSub = dbRef.collection("invites").onSnapshot((snap) => { snap.docs.forEach((d) => { const x = d.data(); if (x && (x.email || x.phone) && x.code) invites.set(keyOfInv(x), x); }); saveInvites(); renderInvites(); }, () => {});
   } catch (e) {}
 }
 
