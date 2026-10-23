@@ -668,6 +668,23 @@ input::placeholder,textarea::placeholder{color:rgba(191,200,255,.45)}
 .toast .go em{font-style:normal;font-size:12.5px;color:var(--grey);display:block}
 .toast .x{border:0;background:#eef3fb;width:44px;font-size:20px;color:var(--grey)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}.layers.kb,.bill-stage .in{animation:none}.roll-in{animation:none;position:static}}
+input[type=password]{background:rgba(255,255,255,.07);border:1.5px solid var(--line);border-radius:10px;color:#fff;padding:12px 13px;font:inherit;font-size:16px;width:100%}
+input[type=password]:focus{outline:2px solid var(--yellow);outline-offset:1px}
+.auth .alogo{width:min(240px,64vw);height:auto;display:block}
+.btn.gbtn{background:#fff;color:#1f1f1f}
+.btn.gbtn svg{width:20px;height:20px;flex:none}
+.pacte p.orline{display:flex;align-items:center;gap:12px;margin:0;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.orline:before,.orline:after{content:"";flex:1;height:1px;background:var(--line)}
+.amail{color:#fff;font-weight:700;word-break:break-all}
+.linkb{border:0;background:none;padding:0;font:inherit;color:var(--yellow);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.astat:empty{display:none}
+.pacte p.astat{color:#fff;font-size:14px;background:rgba(255,255,255,.06);border-left:3px solid var(--yellow);padding:10px 12px;border-radius:6px}
+#arst:empty{display:none}
+.authwait{justify-items:center;text-align:center;padding-top:8vh}
+.authwait i{width:34px;height:34px;border-radius:50%;border:3px solid rgba(255,255,255,.18);border-top-color:var(--yellow);animation:aspin .9s linear infinite}
+@keyframes aspin{to{transform:rotate(360deg)}}
+#fbbar{margin:0 0 4px}
+body.mode-gate .top{background:rgba(11,10,31,.96)}
 </style>
 </head>
 <body>
@@ -837,14 +854,14 @@ const inviteCode = (id) => `${id}-${invChk(id)}`;
 function parseInviteCode(txt) { const m = String(txt || "").toUpperCase().replace(/\s+/g, "").match(/^(T-\d{4})-?([0-9A-Z]{2})$/); return m && invChk(m[1]) === m[2] ? m[1] : null; }
 function readInvite() { try { const o = JSON.parse(localStorage.getItem("bongo-invite") || "null"); return o && o.id ? o : null; } catch (e) { return null; } }
 function storeInvite(o) { try { localStorage.setItem("bongo-invite", JSON.stringify(o)); } catch (e) {} }
-function inviteLink(inv, reply) { const tok = b64e(JSON.stringify({ c: inviteCode(inv.code), n: (inv.name || "").split(" ")[0], r: reply || "" })); return `${publicBase()}?i=${tok}`; }
+function inviteLink(inv, reply) { const tok = b64e(JSON.stringify({ c: inviteCode(inv.code), n: (inv.name || "").split(" ")[0], r: reply || "", ...(inv.email ? { e: inv.email } : {}) })); return `${publicBase()}?i=${tok}`; }
 function captureInvite() {
   let tok = null;
   try { tok = new URL(location.href).searchParams.get("i") || ((location.hash.match(/[#&]i=([^&]+)/) || [])[1] || null); } catch (e) {}
   if (tok) {
     try {
       const o = JSON.parse(b64d(tok)), id = parseInviteCode(o.c);
-      if (id) { const inv = { id, n: String(o.n || "").trim().slice(0, 40), r: /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(o.r || "") ? String(o.r) : "" }; storeInvite(inv); INVITE_FRESH = true; try { history.replaceState(null, "", location.pathname); } catch (e) {} return inv; }
+      if (id) { const inv = { id, n: String(o.n || "").trim().slice(0, 40), r: /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(o.r || "") ? String(o.r) : "", e: /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(o.e || "") ? String(o.e).toLowerCase().slice(0, 120) : "" }; storeInvite(inv); INVITE_FRESH = true; try { history.replaceState(null, "", location.pathname); } catch (e) {} return inv; }
     } catch (e) {}
   }
   return readInvite();
@@ -1619,7 +1636,7 @@ function group(id, label, opts, cls = "") { return `<div style="display:grid;gap
 const MOMENTS = [["test", "Le test vidéo"], ["audio", "L'audio"], ["fil", "Le groupe famille"], ["doc", "Le communiqué"], ["piege", "Le piège"], ["wewa", "Le wewa"], ["compte", "@VraiKin243"], ["qcm", "Les QCM"]];
 async function avis() {
   mode("page"); setBackdrop("");
-  render(`<div class="page"><p class="eyebrow">Ta mission · ton avis compte</p><h1>Dix questions, deux minutes</h1><p class="small">Tes réponses sont anonymes : seul ton code testeur les accompagne. N'écris pas ton nom.</p>
+  render(`<div class="page"><p class="eyebrow">Ta mission · ton avis compte</p><h1>Dix questions, deux minutes</h1><p class="small">${FB_ON ? "Tes réponses ne sont vues que par le coordinateur du pilote. Elles ne seront jamais publiées avec ton nom." : "Tes réponses sont anonymes : seul ton code testeur les accompagne. N'écris pas ton nom."}</p>
   ${group("note", "Note l'épisode, de 0 à 10", Array.from({ length: 11 }, (_, i) => [i, i]), "nums")}
   ${group("suite", "Tu veux voir l'épisode 2 ?", [["oui", "Oui, tout de suite"], ["peut", "Peut-être"], ["non", "Non"]])}
   ${group("prix", "Les épisodes 1 à 3 sont gratuits. Pour débloquer la suite de la saison 1 (épisodes 4 à 6), tu paierais…", [["0", "Rien"], ["1", "1 USD"], ["2.99", "2,99 USD"], ["5", "5 USD ou plus"]])}
@@ -1631,7 +1648,7 @@ async function avis() {
   ${group("voix", "La voix off", [["bien", "Bien"], ["gene", "Gênante"], ["off", "Je l'ai coupée"]])}
   ${group("data", "Un problème de connexion ou de données ?", [["non", "Non"], ["peu", "Un peu"], ["oui", "Oui"]])}
   <label class="f" for="fbl">Un mot libre : ce qui t'a plu, ce qu'il faut changer<textarea id="fbl" maxlength="400" placeholder="Ex. : le lion m'a eu, j'aurais voulu revoir la vidéo…"></textarea></label>
-  <button class="btn gold wide" id="fbgo">Obtenir mon code de résultats</button></div>`);
+  <button class="btn gold wide" id="fbgo">${FB_ON ? "Envoyer mes résultats" : "Obtenir mon code de résultats"}</button></div>`);
   $$(".opt-group").forEach((g) => $$("button", g).forEach((b) => (b.onclick = () => { $$("button", g).forEach((x) => x.setAttribute("aria-pressed", x === b)); S.fb[g.dataset.g] = b.dataset.v; save(); })));
   $$(".opt-group").forEach((g) => { const v = S.fb[g.dataset.g]; if (v != null) $$("button", g).forEach((x) => x.setAttribute("aria-pressed", x.dataset.v == v)); });
   $("#fbl").value = S.fb.libre || ""; $("#fbl").oninput = (ev) => { S.fb.libre = ev.target.value.slice(0, 400); save(); };
@@ -1646,10 +1663,12 @@ function codeView() {
   mode("page"); setBackdrop(""); $("#meAv").innerHTML = avatarSVG(S.av);
   const s = statsOf(S.q, EP_IDS), e = statsOf(S.et, ET_IDS), code = "BONGO2." + b64e(JSON.stringify(payload()));
   const msg = `BONGO pilote · ${S.id} · test ${e.ok}/7 · épisode ${s.ok}/13 · note ${S.fb.note != null ? S.fb.note : "?"}/10\n${code}`;
-  render(`<div class="page"><p class="eyebrow">Dernière étape de ta mission</p><h1>Envoie ton code au coordinateur</h1><p class="lead">Copie ce message et colle-le dans la conversation WhatsApp du panel. Il contient tes réponses et ton avis, sans ton nom.</p><div class="code" id="code" tabindex="0">${esc(msg)}</div><button class="btn gold wide" id="cp">Copier le message</button><div class="row"><a class="btn ghost" id="cpwa" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Envoyer sur WhatsApp</a><a class="btn ghost" id="cpmail" href="mailto:${INVITE && INVITE.r ? INVITE.r : ""}?subject=${encodeURIComponent("Mes résultats BONGO · " + S.id)}&body=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Envoyer par e-mail</a></div><p class="small" id="cpst" role="status"></p>
+  const auto = FB_ON && ACC && ACC.inv;
+  render(`<div class="page">${auto ? `<p class="eyebrow">Mission accomplie</p><h1 id="rh">Envoi de tes résultats…</h1><p class="lead" id="rl">Tes réponses et ton avis partent vers le coordinateur du pilote, et vers lui seul.</p><p class="lbl" id="rbk" style="margin:6px 0 0">Copie de secours, si le coordinateur te la demande</p>` : `<p class="eyebrow">Dernière étape de ta mission</p><h1>Envoie ton code au coordinateur</h1><p class="lead">Copie ce message et colle-le dans la conversation WhatsApp du panel. Il contient tes réponses et ton avis, sans ton nom.</p>`}<div class="code" id="code" tabindex="0">${esc(msg)}</div><button class="btn gold wide" id="cp">Copier le message</button><div class="row"><a class="btn ghost" id="cpwa" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Envoyer sur WhatsApp</a><a class="btn ghost" id="cpmail" href="mailto:${INVITE && INVITE.r ? INVITE.r : ""}?subject=${encodeURIComponent("Mes résultats BONGO · " + S.id)}&body=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Envoyer par e-mail</a></div><p class="small" id="cpst" role="status"></p>
   <section class="card"><p class="eyebrow">À suivre</p><div class="upn">${posterHTML(EPS[1])}<div style="display:grid;gap:6px"><h3 style="font-size:21px">É2 · L'Œil</h3><p class="lead">Ya Mado va te montrer ce que tu regardes sans le voir. Et Grâce appelle : « J'ai un dossier de crédit trop parfait. »</p><p class="small">Gratuit · disponible pour le panel au prochain test</p></div></div></section>
   <div class="row"><button class="btn ghost" id="tohome">Retour à l'accueil</button><button class="btn ghost" id="again">Nouveau testeur</button></div></div>`);
   $("#cp").onclick = async () => { try { await navigator.clipboard.writeText(msg); $("#cpst").textContent = "Copié. Colle-le maintenant dans WhatsApp."; } catch (err) { const r = document.createRange(); r.selectNodeContents($("#code")); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(r); $("#cpst").textContent = "Le texte est sélectionné : copie-le avec ton téléphone."; } };
+  if (auto) fbSaveResult(code).then(() => { if (!$("#rh")) return; $("#rh").textContent = "Merci, tes résultats sont bien arrivés."; $("#rl").textContent = "Le coordinateur les a reçus automatiquement. Tu n'as rien d'autre à faire."; sfx("good"); }).catch(() => { if (!$("#rh")) return; $("#rh").textContent = "Envoie ton code au coordinateur"; $("#rl").textContent = "L'envoi automatique n'a pas abouti. Copie ce message et envoie-le au coordinateur par WhatsApp ou par e-mail : il contient tes réponses et ton avis."; $("#rbk").hidden = true; });
   $("#tohome").onclick = () => home();
   $("#again").onclick = () => { try { localStorage.removeItem(STORE); } catch (err) {} S = newState(); newProfile(false); };
 }
@@ -1658,6 +1677,7 @@ function codeView() {
 let OWNER = null;
 async function isOwner() {
   if (OWNER !== null) return OWNER;
+  if (FB_ON) return (OWNER = !!(ACC && ACC.admin));
   if (HOSTED) { try { return (OWNER = localStorage.getItem("bongo-owner") === "1"); } catch (e) { return (OWNER = false); } }
   try { const use = window.claude && window.claude.use ? window.claude.use.bind(window.claude) : null; if (!use) return (OWNER = true); const user = await use("user"); OWNER = !!(user && (await user.canEdit())); } catch (e) { OWNER = false; }
   return OWNER;
@@ -1672,7 +1692,7 @@ function missionHTML(full) {
   <div class="msteps">
     <div class="mstep"><span class="mn">1</span><div><b>Regarde l'épisode 1 jusqu'au bout</b><p>Environ 25 minutes : un test vidéo, cinq chapitres, puis le Verdict. Joue le jeu, sans aide ni recherche : tes erreurs comptent autant que tes réussites.</p></div></div>
     <div class="mstep"><span class="mn">2</span><div><b>Donne ton avis en dix questions</b><p>Deux minutes à la fin : ce qui t'a captivé, ce qui t'a ennuyé, ce qui t'a surpris, et ce que tu serais prêt à payer.</p></div></div>
-    <div class="mstep"><span class="mn">3</span><div><b>Renvoie ton code de résultats</b><p>Un message à copier, que tu envoies au coordinateur par WhatsApp ou par e-mail. Il contient tes réponses et ton avis, jamais ton nom.</p></div></div>
+    <div class="mstep"><span class="mn">3</span><div>${FB_ON ? `<b>Tes résultats partent tout seuls</b><p>À la fin, tes réponses et ton avis sont transmis automatiquement au coordinateur du pilote, et à lui seul. Rien d'autre à faire.</p>` : `<b>Renvoie ton code de résultats</b><p>Un message à copier, que tu envoies au coordinateur par WhatsApp ou par e-mail. Il contient tes réponses et ton avis, jamais ton nom.</p>`}</div></div>
     <div class="mstep"><span class="mn">4</span><div><b>Reste disponible pour la suite</b><p>Les épisodes 2 et 3, eux aussi gratuits, te seront soumis lors des prochains tests. Ta fidélité compte autant que ton premier avis.</p></div></div>
   </div>
   <p class="lbl" style="margin:6px 0 0">Ce que nous attendons de toi</p>
@@ -1698,7 +1718,8 @@ function whoWatches() {
   mode("gate"); hush(); setBackdrop(""); $("#meAv").innerHTML = "";
   const saved = load();
   const status = (x) => x.done ? "Épisode terminé" : x.step && x.step !== "accueil" ? "En cours · " + (CH[x.step] || [""])[0] : "Profil prêt";
-  render(`<div class="gate"><h1>${INVITE && INVITE.n && !(saved && saved.pact && saved.nm) ? `${greetWord()} ${esc(INVITE.n)}, qui regarde ?` : "Qui regarde ?"}</h1><div class="profiles">${saved && saved.pact ? `<button class="prof-t" id="pSaved"><span class="pic">${avatarSVG(saved.av)}</span>${esc(saved.nm || saved.id)}<small>${esc((saved.nm ? saved.id + " · " : "") + status(saved))}</small></button>` : ""}<button class="prof-t" id="pNew"><span class="pic add">${ICON.plus}</span>${INVITE && INVITE.n ? esc(INVITE.n) : "Nouveau testeur"}<small>${INVITE ? "Invitation reçue" : "Panel du pilote"}</small></button><button class="prof-t" id="pCoord" hidden><span class="pic add">${ICON.chart}</span>Coordinateur<small>Résultats du panel</small></button></div><p class="small">BONGO · Académie de l'esprit critique · Pilote privé</p></div>`);
+  render(`<div class="gate"><h1>${INVITE && INVITE.n && !(saved && saved.pact && saved.nm) ? `${greetWord()} ${esc(INVITE.n)}, qui regarde ?` : "Qui regarde ?"}</h1><div class="profiles">${saved && saved.pact ? `<button class="prof-t" id="pSaved"><span class="pic">${avatarSVG(saved.av)}</span>${esc(saved.nm || saved.id)}<small>${esc((saved.nm ? saved.id + " · " : "") + status(saved))}</small></button>` : ""}<button class="prof-t" id="pNew"><span class="pic add">${ICON.plus}</span>${INVITE && INVITE.n ? esc(INVITE.n) : "Nouveau testeur"}<small>${INVITE ? "Invitation reçue" : "Panel du pilote"}</small></button><button class="prof-t" id="pCoord" hidden><span class="pic add">${ICON.chart}</span>Coordinateur<small>Résultats du panel</small></button></div>${fbWhoLine()}<p class="small">BONGO · Académie de l'esprit critique · Pilote privé</p></div>`);
+  fbWireOut();
   if (saved && saved.pact) $("#pSaved").onclick = () => { S = saved; applyToggles(); home(); };
   $("#pNew").onclick = () => { S = newState(); if (INVITE && INVITE.n) S.nm = INVITE.n; const hs = !!(saved && saved.pact); missionPage(() => newProfile(hs)); };
   $("#pCoord").onclick = () => { location.hash = "#coordination"; };
@@ -1742,7 +1763,7 @@ function home() {
   mode("browse"); hush(); setPaused(false); $("#meAv").innerHTML = avatarSVG(S.av);
   const started = !!S.t0 && S.step !== "accueil" && !S.done, c = CH[S.step], met = metTraps();
   render(`<section class="bill" id="billtop"><div class="bill-blur"><div class="art">${BILL()}</div></div><div class="bill-stage"><div class="in">${BILL()}</div></div><div class="bill-fade"></div><div class="bill-in">${S.nm ? `<p class="hello">${greetWord()} ${esc(S.nm)}, ton épisode t'attend.</p>` : ""}<p class="series">${logoIcon(26)}<span>Série</span></p><div class="bill-title">${ransom("TROIS SECONDES", 5)}</div><p class="meta"><span class="new">Nouveau</span><span>2026</span><span class="age">16+</span><span>Saison 1 · Épisode 1</span><span>≈ 25 min</span><span class="free">3 épisodes gratuits</span></p><p class="bill-tag">Un audio. Sept secondes. Ta famille panique, et ton pouce est déjà sur « Transférer ».</p>${started ? `<div class="resume"><div class="rbar"><i style="width:${progPct()}%"></i></div><span>Reprendre à : ${esc(c ? c[0] + " · " + c[1] : "")}</span></div>` : ""}<div class="bill-btns"><button class="btn" id="play">${ICON.play}${playLabel()}</button><button class="btn ghost" id="info">${ICON.info}Plus d'infos</button></div></div></section>
-  <section class="mcard"><div><p class="eyebrow">Ta mission de testeur</p><p>Regarder l'épisode 1 en entier, donner ton avis en dix questions, renvoyer ton code de résultats.</p></div><button class="btn ghost" id="mrev" type="button">Revoir ma mission</button></section>
+  <section class="mcard"><div><p class="eyebrow">Ta mission de testeur</p><p>${FB_ON ? "Regarder l'épisode 1 en entier et donner ton avis en dix questions : tes résultats partent tout seuls au coordinateur." : "Regarder l'épisode 1 en entier, donner ton avis en dix questions, renvoyer ton code de résultats."}</p></div><button class="btn ghost" id="mrev" type="button">Revoir ma mission</button></section>
   <section class="rail" id="railS1"><h3>Saison 1 · Ne te fais plus avoir <small>6 épisodes · les 3 premiers gratuits</small></h3><div class="rscroll">${EPS.map(epPoster).join("")}</div></section>
   <section class="rail" id="railTraps"><h3>Les douze pièges à collectionner <small>${met.length} sur 12 débloqué${met.length > 1 ? "s" : ""}</small></h3><div class="rscroll">${Object.keys(TRAPS).map((k, i) => trapTile(k, i, met)).join("")}</div></section>
   <footer class="foot"><p>Pilote privé destiné au panel de test. Les personnes, entreprises et comptes de cet épisode sont fictifs.</p><p id="coordLink" hidden><a href="#coordination">Espace coordinateur du panel</a></p></footer>`);
@@ -1795,9 +1816,10 @@ $("#tgVoice").onclick = () => { S.voice = !S.voice; if (!S.voice) hush(); applyT
 $("#tgSound").onclick = () => { S.sound = !S.sound; applyToggles(); save(); };
 $("#plPause").onclick = () => setPaused(!paused);
 $("#plBack").onclick = () => playerMenu();
-$("#brand").onclick = () => { if (document.body.classList.contains("mode-browse")) window.scrollTo({ top: 0, behavior: "smooth" }); else if (S.pact && !document.body.classList.contains("mode-gate")) home(); };
+function leaveToPilot() { if (location.hash === "#coordination") { try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} } const sh = $("#sheet"); if (sh) sh.remove(); if (S.pact) home(); else whoWatches(); }
+$("#brand").onclick = () => { const b = document.body.classList; if (b.contains("mode-browse")) window.scrollTo({ top: 0, behavior: "smooth" }); else if (b.contains("mode-page") && (S.done || $("#cview") || !S.pact)) leaveToPilot(); else if (S.pact && !b.contains("mode-gate") && !b.contains("mode-player") && !b.contains("mode-story")) home(); };
 $("#meAv").onclick = () => whoWatches();
-$$(".navb").forEach((b) => (b.onclick = () => { if (!$("#railS1")) home(); const t = b.dataset.go === "top" ? null : document.getElementById(b.dataset.go); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); else window.scrollTo({ top: 0, behavior: "smooth" }); }));
+$$(".navb").forEach((b) => (b.onclick = () => { if (!$("#railS1")) { if (!S.pact) { leaveToPilot(); return; } if (location.hash === "#coordination") { try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} } home(); } const t = b.dataset.go === "top" ? null : document.getElementById(b.dataset.go); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); else window.scrollTo({ top: 0, behavior: "smooth" }); }));
 window.addEventListener("scroll", () => { document.body.classList.toggle("scrolled", window.scrollY > 30 && document.body.classList.contains("mode-browse")); }, { passive: true });
 document.addEventListener("keydown", (ev) => { if (ev.key === "Escape") { const sh = $("#sheet"); if (sh) sh.remove(); } });
 
@@ -1827,7 +1849,7 @@ function coordRender() { setTimeout(renderInvites, 0);
   <section class="card"><p class="eyebrow">Testeurs</p><div class="tbl"><table><tr><th>Code</th><th>Âge</th><th>Test</th><th>Épisode</th><th>Points</th><th>Note</th><th>Durée</th></tr>${rows.map((r, i) => `<tr><td>${esc(r.id)}</td><td>${esc(r.age || "")}</td><td>${et[i].ok}/7</td><td>${st[i].ok}/13</td><td>${st[i].pts}</td><td>${esc(r.fb.note != null ? r.fb.note : "")}</td><td>${r.t1 ? Math.round((r.t1 - r.t0) / 60000) + " min" : ""}</td></tr>`).join("")}</table></div></section>`;
 }
 async function coordination() {
-  hush(); mode("page"); setBackdrop(""); setProg("accueil"); if (HOSTED) { try { localStorage.setItem("bongo-owner", "1"); } catch (e) {} OWNER = true; }
+  hush(); mode("page"); setBackdrop(""); setProg("accueil"); if (HOSTED && !FB_ON) { try { localStorage.setItem("bongo-owner", "1"); } catch (e) {} OWNER = true; }
   render(`<div class="page">${inviteCardHTML()}<section class="card"><p class="eyebrow">Espace coordinateur du panel</p><h2 style="font-size:28px">Résultats du pilote</h2><p class="small">Colle ici les messages reçus des testeurs sur WhatsApp, un ou plusieurs à la fois. Les codes sont reconnus automatiquement.</p><label class="f" for="cin">Messages des testeurs<textarea id="cin" placeholder="BONGO pilote · T-4821 · test 3/7 · épisode 8/13&#10;BONGO2.eyJ2Ijoy…"></textarea></label><div class="row"><button class="btn" id="cadd">Ajouter au tableau</button></div><p class="status" id="cst" role="status">Connexion au tableau partagé…</p><a href="#" id="cback" style="color:var(--muted);font-size:13px">Retour aux profils</a></section><div id="cview" style="display:grid;gap:14px"></div></div>`);
   $("#cback").onclick = (e) => { e.preventDefault(); history.replaceState(null, "", location.pathname + location.search); whoWatches(); };
   try { JSON.parse(localStorage.getItem("bongo-coord-v2") || "[]").forEach((o) => coordRows.set(keyOf(o), o)); } catch (e) {}
@@ -1839,6 +1861,7 @@ async function coordination() {
     $("#cin").value = ""; coordRender();
     $("#cst").textContent = found.length ? `${found.length} code${found.length > 1 ? "s" : ""} lu${found.length > 1 ? "s" : ""}, ${added} nouveau${added > 1 ? "x" : ""}${dbRef && canSave ? `, ${saved} enregistré${saved > 1 ? "s" : ""} dans le tableau partagé` : ""}.` : "Aucun code BONGO2 trouvé dans le texte collé.";
   };
+  if (FB_ON) { fbCoordConnect(); return; }
   const use = window.claude && window.claude.use ? window.claude.use.bind(window.claude) : null;
   if (!use) { $("#cst").textContent = "Mode local : les résultats restent dans ce navigateur."; return; }
   try {
@@ -1850,11 +1873,197 @@ async function coordination() {
   } catch (e) { $("#cst").textContent = "Les résultats restent dans ce navigateur."; }
 }
 
+/* ---------- Accès protégé : invitation par e-mail et adresse confirmée (Firebase) ---------- */
+const FIREBASE = null;
+const FB_ON = HOSTED && !!(FIREBASE && FIREBASE.apiKey);
+const FBK_URL = "fbkit-12.19.0.js";
+const MAIL_OK = /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i;
+const GLOGO = `<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
+let fbP = null, FBA = null, ACC = null, fbPoll = null;
+function fbLoad() {
+  if (FBA) return Promise.resolve(FBA);
+  if (!fbP) fbP = new Promise((res, rej) => {
+    const s = document.createElement("script"); s.src = FBK_URL; s.async = true;
+    s.onload = () => { try { const K = window.FBK, app = K.initializeApp(FIREBASE), auth = K.getAuth(app), db = K.getFirestore(app); auth.languageCode = "fr"; if (FIREBASE.emu) K.connectAuthEmulator(auth, FIREBASE.emu, { disableWarnings: true }); FBA = { K, auth, db }; res(FBA); } catch (e) { fbP = null; rej(e); } };
+    s.onerror = () => { fbP = null; s.remove(); rej(new Error("fbkit")); };
+    document.head.appendChild(s);
+  });
+  return fbP;
+}
+const fbMail = () => (FBA && FBA.auth.currentUser && FBA.auth.currentUser.email ? FBA.auth.currentUser.email.toLowerCase() : "");
+const fbErr = (e) => String((e && e.code) || "").replace(/^(auth|firestore)\//, "");
+const isDenied = (e) => fbErr(e) === "permission-denied" || /insufficient permissions/i.test(String(e && e.message));
+const actionSettings = () => ({ url: publicBase() });
+function authMsg(e) {
+  const m = {
+    "popup-closed-by-user": "La fenêtre Google a été fermée avant la fin. Réessaie.",
+    "cancelled-popup-request": "La fenêtre Google a été fermée avant la fin. Réessaie.",
+    "popup-blocked": "Ton navigateur a bloqué la fenêtre Google. Autorise-la pour ce site, ou utilise ton adresse e-mail ci-dessous.",
+    "operation-not-supported-in-this-environment": "La connexion Google ne fonctionne pas dans ce navigateur intégré. Ouvre le lien dans Chrome ou Safari, ou utilise ton adresse e-mail ci-dessous.",
+    "web-storage-unsupported": "Ce navigateur bloque la connexion. Ouvre le lien dans Chrome ou Safari, hors navigation privée.",
+    "unauthorized-domain": "Ce site n'est pas encore autorisé dans Firebase : ajoute-le aux domaines autorisés.",
+    "operation-not-allowed": "Ce mode de connexion n'est pas encore activé dans Firebase.",
+    "invalid-email": "Cette adresse e-mail n'est pas valable.",
+    "missing-password": "Choisis un mot de passe d'au moins 6 caractères.",
+    "weak-password": "Le mot de passe doit faire au moins 6 caractères.",
+    "too-many-requests": "Trop d'essais en peu de temps. Patiente quelques minutes, puis réessaie.",
+    "network-request-failed": "Connexion internet impossible. Vérifie ton réseau, puis réessaie.",
+    "user-disabled": "Ce compte a été désactivé par le coordinateur.",
+    "account-exists-with-different-credential": "Cette adresse utilise déjà un autre mode de connexion : essaie avec ton mot de passe.",
+    "quota-exceeded": "Le nombre d'e-mails du jour est atteint. Réessaie demain, ou connecte-toi avec Google."
+  };
+  return m[fbErr(e)] || "La connexion a échoué. Réessaie dans un instant.";
+}
+async function fbAccess(u) {
+  const { K, db } = FBA, em = u.email.toLowerCase();
+  let inv = null, admin = false;
+  const own = () => K.getDoc(K.doc(db, "invites", em));
+  try { const d = await own(); if (d.exists()) inv = d.data(); }
+  catch (e) { if (!isDenied(e)) throw e; await u.getIdToken(true); try { const d = await own(); if (d.exists()) inv = d.data(); } catch (e2) { if (!isDenied(e2)) throw e2; } }
+  try { await K.getDocs(K.query(K.collection(db, "invites"), K.limit(1))); admin = true; } catch (e) { if (!isDenied(e)) throw e; }
+  return { inv, admin, email: em };
+}
+function authShell(inner) { mode("gate"); setBackdrop(""); render(`<section class="pacte auth"><img src="${LOGO}" alt="BONGO" class="alogo">${inner}</section>`); }
+function fbWait() { mode("gate"); setBackdrop(""); render(`<section class="pacte auth authwait"><img src="${LOGO}" alt="BONGO" class="alogo"><i aria-hidden="true"></i><p class="small" role="status">Vérification de ton accès…</p></section>`); }
+async function secureEnter(ctx, after) {
+  fbWait();
+  try { await fbLoad(); await FBA.auth.authStateReady(); } catch (e) { return fbFail(ctx, after); }
+  const u = FBA.auth.currentUser;
+  if (!u) return signInView(ctx, after);
+  if (!u.emailVerified) return verifyView(ctx, after, false);
+  let acc; try { acc = await fbAccess(u); } catch (e) { return fbFail(ctx, after); }
+  ACC = acc; OWNER = acc.admin;
+  if (ctx === "coord") return acc.admin ? after(acc) : deniedView(ctx, after);
+  if (!acc.inv && !acc.admin) return deniedView(ctx, after);
+  if (acc.inv) { const prev = INVITE || {}; INVITE = { id: String(acc.inv.code || prev.id || ""), n: String(acc.inv.name || prev.n || "").split(" ")[0].slice(0, 40), r: prev.r || "", e: acc.email }; storeInvite(INVITE); }
+  after(acc);
+}
+function toPilot() { try { history.replaceState(null, "", location.pathname); } catch (e) {} secureEnter("tester", enterApp); }
+async function fbSignOut() { clearInterval(fbPoll); try { await FBA.K.signOut(FBA.auth); } catch (e) {} ACC = null; OWNER = null; INVITE = null; try { localStorage.removeItem("bongo-invite"); } catch (e) {} }
+function signInView(ctx, after) {
+  const c = ctx === "coord", n = !c && INVITE && INVITE.n ? INVITE.n : "", em = (!c && INVITE && INVITE.e) || "";
+  authShell(`<p class="eyebrow">${c ? "Espace coordinateur · accès protégé" : "Pilote privé · accès protégé"}</p>
+  <h1>${c ? "Connexion du coordinateur" : n ? `${esc(n)}, confirme que c'est bien toi.` : "Confirme ton invitation."}</h1>
+  <p>${c ? "Cet espace est réservé au compte coordinateur du pilote." : `Pour protéger le pilote, BONGO vérifie que l'invitation est bien la tienne. Connecte-toi avec l'adresse e-mail à laquelle tu as été invité(e)${em ? ` : <b class="amail">${esc(em)}</b>` : ""}.`}</p>
+  <button class="btn gbtn wide" id="aG" type="button">${GLOGO}Continuer avec Google</button>
+  <p class="orline">ou avec ton adresse e-mail</p>
+  <label class="f" for="aem">Adresse e-mail<input type="email" id="aem" autocomplete="email" inputmode="email" spellcheck="false" value="${esc(em)}" placeholder="prenom.nom@exemple.com"></label>
+  <label class="f" for="apw">Mot de passe<input type="password" id="apw" autocomplete="current-password" placeholder="6 caractères minimum"></label>
+  <p class="small">Première visite ? Choisis simplement un mot de passe : BONGO t'enverra un e-mail pour confirmer ton adresse.</p>
+  <button class="btn ghost wide" id="aGo" type="button">Continuer avec mon adresse</button>
+  <p class="small astat" id="ast" role="status" aria-live="polite"></p><div id="arst"></div>
+  ${c ? `<button class="btn ghost wide" id="aBack" type="button">Retour au pilote</button>` : `<p class="small">Ton adresse sert seulement à t'ouvrir l'accès et à rattacher tes résultats. Seul le coordinateur la voit.</p>`}`);
+  const st = (t) => { $("#ast").textContent = t; };
+  const busy = (on) => ["#aG", "#aGo"].forEach((s) => { const b = $(s); if (b) b.disabled = on; });
+  const { K, auth } = FBA;
+  $("#aG").onclick = async () => {
+    busy(true); st("Ouverture de Google…");
+    try { const p = new K.GoogleAuthProvider(); p.setCustomParameters(em ? { prompt: "select_account", login_hint: em } : { prompt: "select_account" }); await K.signInWithPopup(auth, p); sfx("good"); secureEnter(ctx, after); }
+    catch (e) { busy(false); st(authMsg(e)); }
+  };
+  const go = async () => {
+    const mail = $("#aem").value.trim().toLowerCase(), pw = $("#apw").value; $("#arst").innerHTML = "";
+    if (!MAIL_OK.test(mail)) { st("Saisis une adresse e-mail valable."); return; }
+    if (pw.length < 6) { st("Le mot de passe doit faire au moins 6 caractères."); return; }
+    busy(true); st("Connexion…");
+    try { await K.signInWithEmailAndPassword(auth, mail, pw); return secureEnter(ctx, after); }
+    catch (e) {
+      if (!/invalid-credential|invalid-login-credentials|user-not-found|wrong-password/.test(fbErr(e))) { busy(false); st(authMsg(e)); return; }
+      try { const cr = await K.createUserWithEmailAndPassword(auth, mail, pw); try { await K.sendEmailVerification(cr.user, actionSettings()); } catch (e3) {} return verifyView(ctx, after, true); }
+      catch (e2) {
+        busy(false);
+        if (fbErr(e2) !== "email-already-in-use") { st(authMsg(e2)); return; }
+        st("Mot de passe incorrect pour cette adresse. Si tu t'étais connecté(e) avec Google, utilise plutôt le bouton Google.");
+        $("#arst").innerHTML = `<button class="btn ghost wide" id="apr" type="button">Choisir un nouveau mot de passe</button>`;
+        $("#apr").onclick = async () => { $("#apr").disabled = true; try { await K.sendPasswordResetEmail(auth, mail, actionSettings()); st(`E-mail envoyé à ${mail} : clique sur le lien pour choisir un nouveau mot de passe, puis reviens ici.`); } catch (e4) { st(authMsg(e4)); $("#apr").disabled = false; } };
+      }
+    }
+  };
+  $("#aGo").onclick = go; $("#apw").onkeydown = (ev) => { if (ev.key === "Enter") go(); };
+  const b = $("#aBack"); if (b) b.onclick = toPilot;
+}
+function verifyView(ctx, after, sent) {
+  const mail = fbMail();
+  authShell(`<p class="eyebrow">Dernière vérification</p><h1>Ouvre ta boîte mail.</h1>
+  <p>${sent ? "BONGO vient d'envoyer" : "BONGO t'a envoyé"} un lien de confirmation à <b class="amail">${esc(mail)}</b>. Clique sur ce lien, puis reviens ici : l'accès s'ouvrira tout seul.</p>
+  <p class="small">Rien reçu après deux minutes ? Regarde dans les courriers indésirables ou l'onglet « Promotions ».</p>
+  <button class="btn gold wide" id="vchk" type="button">J'ai confirmé mon adresse</button><button class="btn ghost wide" id="vre" type="button">Renvoyer l'e-mail</button><button class="btn ghost wide" id="vout" type="button">Utiliser une autre adresse</button>
+  <p class="small astat" id="vst" role="status" aria-live="polite"></p>`);
+  let alive = true, t = null;
+  const vis = () => { if (!document.hidden) check(false); };
+  const leave = () => { alive = false; clearInterval(t); document.removeEventListener("visibilitychange", vis); };
+  async function check(manual) {
+    if (!alive) return; if (!$("#vchk")) { leave(); return; }
+    const cu = FBA.auth.currentUser; if (!cu) { leave(); signInView(ctx, after); return; }
+    try { await cu.reload(); } catch (e) { if (manual) $("#vst").textContent = authMsg(e); return; }
+    if (!alive) return;
+    if (cu.emailVerified) { leave(); try { await cu.getIdToken(true); } catch (e) {} sfx("good"); secureEnter(ctx, after); return; }
+    if (manual) $("#vst").textContent = "Ton adresse n'est pas encore confirmée. Ouvre l'e-mail de BONGO et clique sur le lien.";
+  }
+  t = setInterval(() => { if (!document.hidden) check(false); }, 4000); document.addEventListener("visibilitychange", vis);
+  $("#vchk").onclick = () => check(true);
+  $("#vre").onclick = async () => { const b = $("#vre"); b.disabled = true; try { await FBA.K.sendEmailVerification(FBA.auth.currentUser, actionSettings()); $("#vst").textContent = `Nouvel e-mail envoyé à ${mail}.`; } catch (e) { $("#vst").textContent = authMsg(e); } setTimeout(() => { if (b.isConnected) b.disabled = false; }, 30000); };
+  $("#vout").onclick = async () => { leave(); await fbSignOut(); signInView(ctx, after); };
+}
+function deniedView(ctx, after) {
+  const c = ctx === "coord", mail = fbMail();
+  authShell(`<p class="eyebrow">Accès refusé</p><h1>${c ? "Cet espace est réservé au coordinateur." : "Cette adresse n'est pas sur la liste des invités."}</h1>
+  <p>${c ? `<b class="amail">${esc(mail)}</b> n'a pas les droits du coordinateur du pilote.` : `<b class="amail">${esc(mail)}</b> est bien confirmée, mais elle ne figure pas parmi les testeurs du pilote. Connecte-toi avec l'adresse à laquelle tu as reçu ton invitation, ou demande au coordinateur de t'ajouter.`}</p>
+  <button class="btn gold wide" id="dout" type="button">Utiliser une autre adresse</button>${c ? `<button class="btn ghost wide" id="dback" type="button">Retour au pilote</button>` : ""}`);
+  $("#dout").onclick = async () => { await fbSignOut(); signInView(ctx, after); };
+  const b = $("#dback"); if (b) b.onclick = toPilot;
+}
+function fbFail(ctx, after) {
+  authShell(`<p class="eyebrow">Connexion impossible</p><h1>BONGO n'arrive pas à vérifier ton accès.</h1><p>Vérifie ta connexion internet, puis réessaie.</p><button class="btn gold wide" id="fretry" type="button">Réessayer</button>`);
+  $("#fretry").onclick = () => secureEnter(ctx, after);
+}
+function enterApp() { const sv = load(); if (INVITE && INVITE.id && !(sv && sv.pact && sv.id === INVITE.id)) welcomeInvite(!!(sv && sv.pact)); else whoWatches(); }
+function fbWhoLine() { const m = FB_ON ? fbMail() : ""; return m ? `<p class="small">Connecté avec ${esc(m)} · <button class="linkb" id="fbout" type="button">Changer de compte</button></p>` : ""; }
+function fbWireOut() { const b = $("#fbout"); if (b) b.onclick = async () => { await fbSignOut(); toPilot(); }; }
+
+/* --- Résultats envoyés automatiquement --- */
+async function fbSaveResult(code) {
+  if (!FB_ON || !FBA || !FBA.auth.currentUser || !ACC || !ACC.inv) throw new Error("hors ligne");
+  await FBA.K.setDoc(FBA.K.doc(FBA.db, "results", fbMail()), { code, id: String(S.id || ""), name: String(S.nm || ""), at: Date.now() });
+}
+
+/* --- Espace coordinateur relié à Firestore --- */
+function fbDb() {
+  const { K, db } = FBA;
+  return { collection: (name) => ({
+    doc: (id) => ({ set: (data) => K.setDoc(K.doc(db, name, id), data), delete: () => K.deleteDoc(K.doc(db, name, id)) }),
+    onSnapshot: (cb, err) => {
+      let stop = false, t = null;
+      const run = () => K.getDocs(K.collection(db, name)).then((s) => { if (!stop) cb({ docs: s.docs.map((d) => ({ id: d.id, data: () => d.data() })) }); }).catch((e) => { if (err) err(e); });
+      run(); t = setInterval(() => { if (stop || !$("#cview")) { clearInterval(t); stop = true; if (name === "invites") invSub = null; return; } if (!document.hidden) run(); }, 30000);
+      return () => { stop = true; clearInterval(t); };
+    }
+  }) };
+}
+function fbCoordConnect() {
+  dbRef = fbDb(); canSave = true; syncInvites();
+  const page = $("#view .page"); if (page && !$("#fbbar")) page.insertAdjacentHTML("afterbegin", `<p class="small" id="fbbar">Connecté en coordinateur : ${esc(fbMail())} · <button class="linkb" id="fbout" type="button">Se déconnecter</button></p>`);
+  fbWireOut();
+  const pull = async () => {
+    try {
+      const s = await FBA.K.getDocs(FBA.K.collection(FBA.db, "results"));
+      s.docs.forEach((d) => { const x = d.data(); try { const o = JSON.parse(b64d(String(x.code || "").replace(/^BONGO2\./, ""))); if (o && o.v === 2) { o.em = d.id; coordRows.set(keyOf(o), o); } } catch (e) {} });
+      if (!$("#cview")) return;
+      try { localStorage.setItem("bongo-coord-v2", JSON.stringify(Array.from(coordRows.values()))); } catch (e) {}
+      coordRender();
+      const n = s.size, h = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+      $("#cst").textContent = `Résultats en ligne : ${n} testeur${n > 1 ? "s ont" : " a"} terminé. Mis à jour à ${h}, puis toutes les 30 secondes.`;
+    } catch (e) { const c = $("#cst"); if (c) c.textContent = "Impossible de lire les résultats en ligne pour l'instant. Réessaie dans un instant."; }
+  };
+  pull(); clearInterval(fbPoll); fbPoll = setInterval(() => { if (!$("#cview")) { clearInterval(fbPoll); return; } if (!document.hidden) pull(); }, 30000);
+}
+
+
 /* ---------- Invitations (espace coordinateur) ---------- */
 const INV_KEY = "bongo-invites-v1";
 const invites = new Map();
 let invSub = null;
-const invKey = (k) => String(k).toLowerCase().replace(/[^a-z0-9]/g, "_").slice(0, 80);
+const invKey = (k) => (FB_ON ? String(k).toLowerCase().slice(0, 300) : String(k).toLowerCase().replace(/[^a-z0-9]/g, "_").slice(0, 80));
 const keyOfInv = (i) => i.email ? i.email : "tel:" + i.phone;
 const PUBLIC_MODE = () => /^https?:/.test(PUBLIC_URL) || HOSTED;
 const XLSX_URL = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
@@ -1879,7 +2088,9 @@ function templateHref() { return IN_CLAUDE || publicBase().startsWith("https://c
 /* --- Carte d'invitation --- */
 function inviteCardHTML() {
   let sig = "David Fidami", rep = ""; try { sig = localStorage.getItem("bongo-invsig") || sig; rep = localStorage.getItem("bongo-invrep") || ""; } catch (e) {}
-  const steps = PUBLIC_MODE()
+  const steps = FB_ON
+    ? `<p>Remplis la liste ci-dessous, colle-la depuis Excel, ou importe ton fichier Excel. Une ligne par testeur : prénom, nom, e-mail et numéro WhatsApp. <b>L'e-mail est obligatoire</b> : c'est lui qui ouvre l'accès.</p><p>Appuie sur « Créer les invitations » : chaque adresse rejoint la liste des invités. Personne d'autre ne peut entrer, même avec le lien.</p><p>Envoie chaque invitation par e-mail ou WhatsApp. Le testeur confirme son adresse, avec Google ou par un e-mail de confirmation, et ses résultats arrivent ici tout seuls.</p>`
+    : PUBLIC_MODE()
     ? `<p>Remplis la liste ci-dessous, colle-la depuis Excel, ou importe ton fichier Excel. Une ligne par testeur : prénom, nom, e-mail et numéro WhatsApp. L'e-mail ou le numéro suffit.</p><p>Appuie sur « Créer les invitations » : chaque testeur reçoit un code et un lien personnel, déjà rempli, qui s'ouvre sans compte.</p><p>Envoie chaque invitation par e-mail ou WhatsApp, ou télécharge la liste complète en Excel.</p>`
     : `<p>Sur claude.ai, ouvre le menu <b>Partager</b> de cette page et invite l'adresse du testeur, ou choisis « Quiconque dispose du lien ».</p><p>Remplis la liste ci-dessous ou importe ton fichier Excel : BONGO attribue un code à chaque testeur et prépare son invitation en français.</p><p>Le testeur te renvoie son code de résultats ; colle-le plus bas pour l'ajouter au tableau.</p>`;
   const tpl = templateHref();
@@ -1889,7 +2100,7 @@ function inviteCardHTML() {
   <div class="lhead" aria-hidden="true"><span>Prénom</span><span>Nom</span><span>E-mail</span><span>WhatsApp</span><span></span></div>
   <div id="lrows" class="lrows"></div>
   <div class="ltools"><button class="btn ghost" id="laddrows" type="button">+ 5 lignes</button><label class="btn ghost" for="lfile" tabindex="0" id="lfilebtn">Importer un fichier Excel</label><input type="file" id="lfile" accept=".xlsx,.xls,.csv,.txt" hidden>${tpl ? `<a class="btn ghost" href="${esc(tpl)}" target="_blank" rel="noopener" download>Modèle Excel à remplir</a>` : ""}<button class="btn ghost" id="lclear" type="button">Vider la liste</button></div>
-  <p class="small">Astuce : copie tes colonnes dans Excel ou Google Sheets, puis colle-les dans la première case « Prénom » : toutes les lignes se remplissent d'un coup.</p>
+  ${FB_ON ? `<p class="small">Accès protégé : seules les adresses de cette liste peuvent entrer, après confirmation. Le numéro WhatsApp sert seulement à envoyer l'invitation.</p>` : ""}<p class="small">Astuce : copie tes colonnes dans Excel ou Google Sheets, puis colle-les dans la première case « Prénom » : toutes les lignes se remplissent d'un coup.</p>
   <label class="f" for="isig">Signature de l'invitation<input type="text" id="isig" maxlength="60" value="${esc(sig)}"></label>
   <label class="f" for="irep">Adresse e-mail où les testeurs renvoient leurs résultats (facultatif)<input type="email" id="irep" maxlength="80" value="${esc(rep)}" placeholder="ton.adresse@exemple.com"></label>
   <button class="btn gold wide" id="iadd" disabled>Créer les invitations</button><p class="status" id="ist" role="status"></p><div id="ilist"></div></section>`;
@@ -1900,7 +2111,7 @@ function rowHTML(r = {}) {
   return `<div class="lrow"><input type="text" class="lf" data-f="first" placeholder="Prénom" aria-label="Prénom" value="${esc(r.first || "")}" autocomplete="off"><input type="text" class="lf" data-f="last" placeholder="Nom" aria-label="Nom" value="${esc(r.last || "")}" autocomplete="off"><input type="email" class="lf" data-f="email" placeholder="E-mail" aria-label="E-mail" value="${esc(r.email || "")}" autocomplete="off"><input type="tel" class="lf" data-f="phone" placeholder="WhatsApp" aria-label="Numéro WhatsApp" value="${esc(r.phone || "")}" autocomplete="off"><button class="lx" type="button" aria-label="Supprimer la ligne">×</button></div>`;
 }
 function readRows() { return $$("#lrows .lrow").map((el) => { const o = {}; $$(".lf", el).forEach((i) => (o[i.dataset.f] = i.value.trim())); return o; }); }
-function validRows() { return readRows().map((r) => ({ first: r.first, last: r.last, email: (r.email.match(EMAIL_RE) || [""])[0].toLowerCase(), phone: normPhone(r.phone) })).filter((r) => r.email || r.phone); }
+function validRows() { return readRows().map((r) => ({ first: r.first, last: r.last, email: (r.email.match(EMAIL_RE) || [""])[0].toLowerCase(), phone: normPhone(r.phone) })).filter((r) => (FB_ON ? r.email : r.email || r.phone)); }
 function updCount() { const n = validRows().length, b = $("#iadd"); if (!b) return; b.disabled = !n; b.textContent = n ? `Créer ${n} invitation${n > 1 ? "s" : ""}` : "Créer les invitations"; }
 function setRows(list, append) {
   const box = $("#lrows"); if (!box) return;
@@ -1972,20 +2183,26 @@ function invMail(inv) {
   const link = PUBLIC_MODE() ? inviteLink(inv, replyAddr()) : ARTIFACT_URL;
   const subject = "Invitation · Pilote BONGO, épisode 1 « Trois secondes »";
   const intro = [`Bonjour${first ? " " + first : ""},`, "", "Tu es invité(e) à tester en avant-première l'épisode 1 de BONGO, l'Académie de l'esprit critique. Compte environ 25 minutes, avec des écouteurs si possible.", ""];
-  const steps = PUBLIC_MODE()
+  const steps = FB_ON
+    ? [`1. Ouvre ton lien personnel, sur ton téléphone ou ton ordinateur : ${link}`, `2. Confirme que l'invitation est bien la tienne : choisis « Continuer avec Google », ou reçois un e-mail de confirmation à ${inv.email}. Seule cette adresse ouvre l'accès au pilote.`, "3. À la fin de l'épisode, tes résultats sont envoyés automatiquement au coordinateur. Tu n'as rien d'autre à faire."]
+    : PUBLIC_MODE()
     ? [`1. Ouvre ton lien personnel, sur ton téléphone ou ton ordinateur : ${link}`, `2. Ton code testeur est déjà rempli. Si on te demande ton code d'invitation, saisis : ${inviteCode(inv.code)}`, "3. À la fin de l'épisode, renvoie ton code de résultats en réponse à cet e-mail, ou sur WhatsApp."]
     : [`1. Ouvre ce lien : ${ARTIFACT_URL}`, `2. Connecte-toi à Claude avec cette adresse e-mail : ${inv.email}. Si tu n'as pas encore de compte Claude, crée-le gratuitement avec cette même adresse, sinon le lien ne s'ouvrira pas.`, `3. Choisis « Nouveau testeur » et saisis ton code testeur : ${inv.code}`, "4. À la fin de l'épisode, copie ton code de résultats et renvoie-le en réponse à cet e-mail, ou sur WhatsApp."];
   const body = [...intro, ...steps, "", "Les personnes, entreprises et comptes de l'épisode sont fictifs. Rien ne te sera demandé : ni argent, ni donnée personnelle.", "", "Merci pour ton aide,", sig].join("\n");
-  const waText = [`Bonjour${first ? " " + first : ""} ! Tu es invité(e) à tester l'épisode 1 de BONGO, l'Académie de l'esprit critique (25 min, écouteurs conseillés).`, "", `Ton lien personnel : ${link}`, `Ton code d'invitation : ${inviteCode(inv.code)}`, "", "À la fin, renvoie-moi ton code de résultats ici.", sig].join("\n");
+  const waText = FB_ON
+    ? [`Bonjour${first ? " " + first : ""} ! Tu es invité(e) à tester l'épisode 1 de BONGO, l'Académie de l'esprit critique (25 min, écouteurs conseillés).`, "", `Ton lien personnel : ${link}`, `Pour entrer, confirme ton adresse ${inv.email}, avec le bouton Google ou par l'e-mail de confirmation : seule cette adresse ouvre l'accès.`, "", "À la fin, tes résultats me parviennent automatiquement.", sig].join("\n")
+    : [`Bonjour${first ? " " + first : ""} ! Tu es invité(e) à tester l'épisode 1 de BONGO, l'Académie de l'esprit critique (25 min, écouteurs conseillés).`, "", `Ton lien personnel : ${link}`, `Ton code d'invitation : ${inviteCode(inv.code)}`, "", "À la fin, renvoie-moi ton code de résultats ici.", sig].join("\n");
   return { subject, body, href: inv.email ? `mailto:${inv.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}` : "", wa: `https://wa.me/${inv.phone || ""}?text=${encodeURIComponent(waText)}`, waText, link };
 }
 function saveInvites() { try { localStorage.setItem(INV_KEY, JSON.stringify([...invites.values()])); } catch (e) {} }
 async function copyText(txt, ok) { try { await navigator.clipboard.writeText(txt); $("#ist").textContent = ok; } catch (e) { $("#ist").textContent = "Le navigateur a bloqué la copie : utilise plutôt les boutons d'envoi ou le téléchargement."; } }
 
 /* --- Export de la liste --- */
+const gotSet = () => new Set([...coordRows.values()].flatMap((r) => [String(r.id || ""), String(r.em || "")]).filter(Boolean));
+const hasRes = (got, i) => got.has(i.code) || (!!i.email && got.has(i.email));
 function exportRows() {
-  const got = new Set([...coordRows.values()].map((r) => String(r.id || "")));
-  return [...invites.values()].sort((a, b) => a.at - b.at).map((i) => { const m = invMail(i), parts = (i.name || "").split(" "); return { "Prénom": parts[0] || "", "Nom": parts.slice(1).join(" "), "E-mail": i.email || "", "WhatsApp": fmtPhone(i.phone), "Code testeur": i.code, "Code d'invitation": inviteCode(i.code), "Lien personnel": m.link, "Statut": got.has(i.code) ? "Résultat reçu" : "En attente", "Invité le": new Date(i.at).toLocaleDateString("fr-FR"), "Message WhatsApp": m.waText }; });
+  const got = gotSet();
+  return [...invites.values()].sort((a, b) => a.at - b.at).map((i) => { const m = invMail(i), parts = (i.name || "").split(" "); return { "Prénom": parts[0] || "", "Nom": parts.slice(1).join(" "), "E-mail": i.email || "", "WhatsApp": fmtPhone(i.phone), "Code testeur": i.code, "Code d'invitation": inviteCode(i.code), "Lien personnel": m.link, "Statut": hasRes(got, i) ? "Résultat reçu" : "En attente", "Invité le": new Date(i.at).toLocaleDateString("fr-FR"), "Message WhatsApp": m.waText }; });
 }
 async function downloadList() {
   const rows = exportRows(); if (!rows.length) return;
@@ -2004,9 +2221,9 @@ function copyAll() { const rows = exportRows(); if (!rows.length) return; const 
 function renderInvites() {
   const box = $("#ilist"); if (!box) return;
   const list = [...invites.values()].sort((a, b) => b.at - a.at);
-  const got = new Set([...coordRows.values()].map((r) => String(r.id || "")));
-  const nOk = list.filter((i) => got.has(i.code)).length;
-  box.innerHTML = list.length ? `<div class="ibar"><p class="lbl" style="margin:0">${list.length} invitation${list.length > 1 ? "s" : ""} · ${nOk} résultat${nOk > 1 ? "s" : ""} reçu${nOk > 1 ? "s" : ""}</p><div class="ltools">${IN_CLAUDE ? "" : `<button class="btn gold" id="idl" type="button">Télécharger la liste (Excel)</button>`}<button class="btn ${IN_CLAUDE ? "gold" : "ghost"}" id="icp" type="button">Copier tout</button></div></div>${IN_CLAUDE && publicCoord() ? `<p class="small" style="margin-top:8px">Pour télécharger la liste en Excel ou le modèle à remplir, ouvre l'outil sur le site public : <a href="${esc(publicCoord())}" target="_blank" rel="noopener">${esc(publicCoord())}</a></p>` : ""}` + list.map((i) => { const m = invMail(i), ok = got.has(i.code), k = keyOfInv(i); return `<div class="inv-row"><div class="who"><b>${esc(i.name || "Sans prénom")}</b><span class="st ${ok ? "ok" : "wait"}">${ok ? "Résultat reçu" : "En attente"}</span></div><div class="who"><span class="small" style="word-break:break-all">${esc([i.email, fmtPhone(i.phone)].filter(Boolean).join(" · "))}</span></div><div class="who"><span class="code2">${esc(inviteCode(i.code))}</span><span class="small">invité le ${new Date(i.at).toLocaleDateString("fr-FR")}</span></div><div class="acts">${m.href ? `<a class="btn gold" href="${esc(m.href)}" target="_blank" rel="noopener">E-mail</a>` : ""}<a class="btn ${m.href ? "ghost" : "gold"}" href="${esc(m.wa)}" target="_blank" rel="noopener">WhatsApp</a><button class="btn ghost" data-link="${esc(k)}" type="button">Copier le lien</button>${m.href ? `<button class="btn ghost" data-copy="${esc(k)}" type="button">Copier l'e-mail</button>` : ""}<button class="btn ghost" data-del="${esc(k)}" type="button" aria-label="Retirer ${esc(i.name || k)}">Retirer</button></div></div>`; }).join("") : `<p class="small" style="margin-top:10px">Aucune invitation pour l'instant.</p>`;
+  const got = gotSet();
+  const nOk = list.filter((i) => hasRes(got, i)).length;
+  box.innerHTML = list.length ? `<div class="ibar"><p class="lbl" style="margin:0">${list.length} invitation${list.length > 1 ? "s" : ""} · ${nOk} résultat${nOk > 1 ? "s" : ""} reçu${nOk > 1 ? "s" : ""}</p><div class="ltools">${IN_CLAUDE ? "" : `<button class="btn gold" id="idl" type="button">Télécharger la liste (Excel)</button>`}<button class="btn ${IN_CLAUDE ? "gold" : "ghost"}" id="icp" type="button">Copier tout</button></div></div>${IN_CLAUDE && publicCoord() ? `<p class="small" style="margin-top:8px">Pour télécharger la liste en Excel ou le modèle à remplir, ouvre l'outil sur le site public : <a href="${esc(publicCoord())}" target="_blank" rel="noopener">${esc(publicCoord())}</a></p>` : ""}` + list.map((i) => { const m = invMail(i), ok = hasRes(got, i), k = keyOfInv(i); return `<div class="inv-row"><div class="who"><b>${esc(i.name || "Sans prénom")}</b><span class="st ${ok ? "ok" : "wait"}">${ok ? "Résultat reçu" : "En attente"}</span></div><div class="who"><span class="small" style="word-break:break-all">${esc([i.email, fmtPhone(i.phone)].filter(Boolean).join(" · "))}</span></div><div class="who"><span class="code2">${esc(inviteCode(i.code))}</span><span class="small">invité le ${new Date(i.at).toLocaleDateString("fr-FR")}</span></div><div class="acts">${m.href ? `<a class="btn gold" href="${esc(m.href)}" target="_blank" rel="noopener">E-mail</a>` : ""}<a class="btn ${m.href ? "ghost" : "gold"}" href="${esc(m.wa)}" target="_blank" rel="noopener">WhatsApp</a><button class="btn ghost" data-link="${esc(k)}" type="button">Copier le lien</button>${m.href ? `<button class="btn ghost" data-copy="${esc(k)}" type="button">Copier l'e-mail</button>` : ""}<button class="btn ghost" data-del="${esc(k)}" type="button" aria-label="Retirer ${esc(i.name || k)}">Retirer</button></div></div>`; }).join("") : `<p class="small" style="margin-top:10px">Aucune invitation pour l'instant.</p>`;
   const dl = $("#idl"); if (dl) dl.onclick = downloadList; const cp = $("#icp"); if (cp) cp.onclick = copyAll;
   $$("[data-copy]", box).forEach((b) => (b.onclick = () => { const i = invites.get(b.dataset.copy); if (!i) return; const m = invMail(i); copyText(`Objet : ${m.subject}\n\n${m.body}`, `Invitation de ${i.name || i.email} copiée : colle-la dans ta messagerie.`); }));
   $$("[data-link]", box).forEach((b) => (b.onclick = () => { const i = invites.get(b.dataset.link); if (!i) return; copyText(invMail(i).link, `Lien personnel de ${i.name || i.email || fmtPhone(i.phone)} copié.`); }));
@@ -2022,15 +2239,16 @@ function initInvites() {
   $("#isig").oninput = () => { try { localStorage.setItem("bongo-invsig", $("#isig").value); } catch (e) {} renderInvites(); };
   $("#irep").oninput = () => { try { localStorage.setItem("bongo-invrep", $("#irep").value); } catch (e) {} renderInvites(); };
   $("#iadd").onclick = async () => {
-    const found = validRows(); let added = 0, dup = 0;
+    const found = validRows(); let added = 0, dup = 0, failed = 0; const keep = [];
     for (const f of found) {
       const name = [f.first, f.last].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 60), k = f.email || "tel:" + f.phone;
       if (invites.has(k)) { dup++; const old = invites.get(k); if (name && !old.name) old.name = name; if (f.phone && !old.phone) old.phone = f.phone; continue; }
       const inv = { email: f.email, phone: f.phone, name, code: newCode(), at: Date.now() + added }; invites.set(k, inv); added++;
-      if (dbRef && canSave) { try { await dbRef.collection("invites").doc(invKey(k)).set(inv); } catch (e) {} }
+      if (dbRef && canSave) { try { await dbRef.collection("invites").doc(invKey(k)).set(inv); } catch (e) { failed++; invites.delete(k); added--; keep.push(f); } }
     }
-    saveInvites(); setRows([], false); renderInvites();
-    $("#ist").textContent = found.length ? `${added} invitation${added > 1 ? "s" : ""} créée${added > 1 ? "s" : ""}${dup ? ` (${dup} déjà invitée${dup > 1 ? "s" : ""})` : ""}. Envoie-les une par une ci-dessous, ou télécharge la liste complète en Excel.` : "Aucune ligne valable : il faut au moins un e-mail ou un numéro WhatsApp par testeur.";
+    saveInvites(); setRows(keep, false); renderInvites();
+    $("#ist").textContent = found.length ? `${added} invitation${added > 1 ? "s" : ""} créée${added > 1 ? "s" : ""}${dup ? ` (${dup} déjà invitée${dup > 1 ? "s" : ""})` : ""}. Envoie-les une par une ci-dessous, ou télécharge la liste complète en Excel.` : (FB_ON ? "Aucune ligne valable : avec l'accès protégé, il faut une adresse e-mail par testeur." : "Aucune ligne valable : il faut au moins un e-mail ou un numéro WhatsApp par testeur.");
+    if (failed) $("#ist").textContent += ` Attention : ${failed} invitation${failed > 1 ? "s n'ont" : " n'a"} pas pu être enregistrée${failed > 1 ? "s" : ""} en ligne : ${failed > 1 ? "elles sont restées" : "elle est restée"} dans la liste. Vérifie ta connexion, puis appuie de nouveau sur « Créer ».`;
     const ib = $("#ilist"); if (ib) ib.scrollIntoView({ behavior: "smooth", block: "start" });
   };
   renderInvites(); syncInvites();
@@ -2038,15 +2256,16 @@ function initInvites() {
 function syncInvites() {
   if (!dbRef || !canSave || invSub) return;
   try {
-    [...invites.values()].forEach((i) => { dbRef.collection("invites").doc(invKey(keyOfInv(i))).set(i).catch(() => {}); });
+    [...invites.values()].filter((i) => !FB_ON || i.email).forEach((i) => { dbRef.collection("invites").doc(invKey(keyOfInv(i))).set(i).catch(() => {}); });
     invSub = dbRef.collection("invites").onSnapshot((snap) => { snap.docs.forEach((d) => { const x = d.data(); if (x && (x.email || x.phone) && x.code) invites.set(keyOfInv(x), x); }); saveInvites(); renderInvites(); }, () => {});
   } catch (e) {}
 }
 
 
 /* ---------- Démarrage ---------- */
-function start() { $("#brand").innerHTML = `<img src="${LOGO}" alt="BONGO">`; applyToggles(); setPaused(false); INVITE = captureInvite(); const sv = load(); if (location.hash === "#coordination") coordination(); else if (HOSTED && !INVITE && !(sv && sv.pact)) invitationGate(); else if (INVITE && INVITE_FRESH && !(sv && sv.pact && sv.id === INVITE.id)) welcomeInvite(!!(sv && sv.pact)); else whoWatches(); }
-window.addEventListener("hashchange", () => { if (location.hash === "#coordination") coordination(); });
+function start() { $("#brand").innerHTML = `<img src="${LOGO}" alt="BONGO">`; applyToggles(); setPaused(false); INVITE = captureInvite(); if (FB_ON) { secureEnter(location.hash === "#coordination" ? "coord" : "tester", location.hash === "#coordination" ? coordination : enterApp); return; } const sv = load(); if (location.hash === "#coordination") coordination(); else if (HOSTED && !INVITE && !(sv && sv.pact) && !ownerFlag()) invitationGate(); else if (INVITE && INVITE_FRESH && !(sv && sv.pact && sv.id === INVITE.id)) welcomeInvite(!!(sv && sv.pact)); else whoWatches(); }
+function ownerFlag() { try { return localStorage.getItem("bongo-owner") === "1"; } catch (e) { return false; } }
+window.addEventListener("hashchange", () => { if (location.hash === "#coordination" && !$("#cview")) { if (FB_ON) secureEnter("coord", coordination); else coordination(); } });
 try { if (window.claude && window.claude.hot && window.claude.hot.snapshot) window.claude.hot.snapshot(() => ({ S })); } catch (e) {}
 if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(start); else start();
 })();
