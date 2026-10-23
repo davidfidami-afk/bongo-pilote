@@ -963,15 +963,22 @@ function recap(n) {
   if (n === 5 && sc.s4) return `Lundi, la coupure a duré six heures. Pour toi, l'audio ${({ raison: "avait raison", tort: "avait tort", gonfle: "avait gonflé un fait vrai" }[sc.s4.k] || "restait un mystère")}. Et le compte qui l'a lancé crie victoire.`;
   return "";
 }
+const CARD_TXT = {
+  prologue: "Prologue. Ton cerveau te ment-il ? La vidéo ne passe qu'une fois. Elle a été conçue pour te tromper. Ta mission : compte les passes du sachet jaune entre les vendeurs en tablier bleu. Ignore le ballon blanc des vendeurs en tablier blanc.",
+  eclair: "Trois questions éclair. Écris un nombre. La première réponse qui te vient n'est pas forcément la bonne.",
+  verdict: "Le Verdict du samedi. Des situations nouvelles. Plusieurs réponses sont défendables ; une seule est la meilleure. Annoncer « certain » ne rapporte que si tu as plus de 80 % de chances d'avoir raison."
+};
+const cardSay = (n, title, intro) => `Chapitre ${["un", "deux", "trois", "quatre", "cinq"][n - 1]}. ${title}. ${intro}`;
 function sceneCard(n, day, fmt, title, intro) {
   S.step = "s" + n; save(); setProg(S.step); setBackdrop(CH_ART[n] ? CH_ART[n]() : "");
   const prev = recap(n), secs = 12;
   render(`<section class="chap"><p class="chap-k">Chapitre ${n} <span>sur 5</span></p><h1 class="chap-t">${esc(title)}</h1><p class="chap-m"><span class="tag">${esc(fmt)}</span><span>${esc(day)}</span><span>·</span><span>≈ 3 min</span></p><p class="chap-i">${esc(intro)}</p>${prev ? `<div class="prev"><b>Précédemment dans BONGO</b>${esc(prev)}</div>` : ""}<button class="play" id="go"><span class="ring"><svg class="r" viewBox="0 0 46 46" aria-hidden="true"><circle cx="23" cy="23" r="21" style="animation-duration:${FAST ? 1 : secs}s"/></svg>${ICON.tri}</span><span>Lancer le chapitre<small id="goct">Lecture automatique dans ${secs} s</small></span></button></section>`);
   sfx("whoosh");
   return new Promise((res) => {
-    let left = FAST ? 1 : secs, done = false;
+    let left = FAST ? 1 : secs, done = false, talking = true;
+    speak(cardSay(n, title, intro), "narr").then(() => { talking = false; });
     const fin = () => { if (done) return; done = true; clearInterval(iv); res(); };
-    const iv = setInterval(() => { if (paused) return; left--; const g = $("#goct"); if (g) g.textContent = left > 0 ? `Lecture automatique dans ${left} s` : "Lecture…"; if (left <= 0) fin(); }, 1000);
+    const iv = setInterval(() => { if (paused || talking) return; left--; const g = $("#goct"); if (g) g.textContent = left > 0 ? `Lecture automatique dans ${left} s` : "Lecture…"; if (left <= 0) fin(); }, 1000);
     $("#go").onclick = fin;
   }).then(() => ac());
 }
@@ -1286,6 +1293,7 @@ async function entryTest() {
   render(`<section class="chap"><p class="chap-k">Prologue <span>· avant l'épisode</span></p><h1 class="chap-t">Ton cerveau te ment-il ?</h1><p class="chap-m"><span class="tag">Vidéo</span><span>30 secondes</span><span>·</span><span>7 questions</span></p><p class="chap-i">La vidéo ne passe qu'une fois. Elle a été conçue pour te tromper.</p>
   <div class="mission"><p class="mk">Ta mission</p><div class="rule"><span class="dot" style="background:#0796f0"></span><span><b>Compte les passes du sachet jaune</b> entre les vendeurs en tablier <b>bleu</b>.</span></div><div class="rule"><span class="dot" style="background:#f4f7fc"></span><span>Ignore le ballon blanc des vendeurs en tablier blanc.</span></div></div>
   <button class="play" id="vgo"><span class="ring">${ICON.tri}</span><span>Lancer la vidéo<small>Mets-toi bien en face de l'écran</small></span></button></section>`);
+  speak(CARD_TXT.prologue, "narr");
   await btnWait("#vgo"); ac();
   render(`<div class="screen"><div id="vh" style="width:100%"></div></div>`);
   const pm = playMarket($("#vh"), false);
@@ -1300,6 +1308,7 @@ async function entryTest() {
   $("#vstage").insertAdjacentHTML("beforeend", `<div class="vhint top">Rediffusion · les yeux ouverts</div><div class="after-ov"><button class="btn ghost" id="vskip">Passer la rediffusion</button></div>`);
   await Promise.race([rv, btnWait("#vskip")]);
   render(`<section class="chap"><p class="chap-k">Prologue <span>· suite</span></p><h1 class="chap-t">Trois questions éclair</h1><p class="chap-m"><span class="tag">Chrono</span><span>25 secondes chacune</span></p><p class="chap-i">Écris un nombre. La première réponse qui te vient n'est pas forcément la bonne.</p><button class="play" id="ngo"><span class="ring">${ICON.tri}</span><span>Commencer<small>Le chronomètre part tout de suite</small></span></button></section>`);
+  speak(CARD_TXT.eclair, "narr");
   await btnWait("#ngo");
   await ask("N1", `<p class="eyebrow">Prologue · question 5 sur 7</p>`, "et");
   await ask("N2", `<p class="eyebrow">Prologue · question 6 sur 7</p>`, "et");
@@ -1560,6 +1569,7 @@ async function verdict() {
   <div class="mission"><p class="mk">Le barème de la certitude</p><table class="scale"><tr><th>Ta certitude</th><th>Si tu as raison</th><th>Si tu as tort</th></tr><tr><td>Je devine</td><td>+1</td><td>0</td></tr><tr><td>Assez sûr</td><td>+2</td><td>−2</td></tr><tr><td>Certain</td><td>+3</td><td>−6</td></tr></table><p class="small">Annoncer « certain » ne rapporte que si tu as plus de 80 % de chances d'avoir raison. Si le temps s'écoule, la question vaut zéro.</p></div>
   <button class="play" id="vgo"><span class="ring">${ICON.tri}</span><span>Commencer le Verdict<small>Le premier chronomètre part aussitôt</small></span></button></section>`);
   sfx("whoosh");
+  speak(CARD_TXT.verdict, "narr");
   await btnWait("#vgo");
   const ids = ["V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8"];
   for (let i = 0; i < ids.length; i++) { if (S.q[ids[i]]) continue; await ask(ids[i], `<p class="eyebrow">Verdict · question ${i + 1} sur 8</p>`); }
@@ -1572,6 +1582,8 @@ function credits() {
     render(`<section class="credits"><div class="roll"><div class="roll-in">
       <div><img class="roll-logo" src="${LOGO}" alt="BONGO"><p><span>Saison 1 · Épisode 1</span><br>Trois secondes</p></div>
       <div><h4>Avec</h4><p>${S.nm ? esc(S.nm) : "Toi"} <span>dans ton propre rôle</span></p><p>Ya Mado <span>la mentor</span></p><p>Tonton Dédé <span>l'oncle qui sait tout</span></p><p>Tante Annie <span>la mémoire d'octobre</span></p><p>Maman Bijou <span>qui transfère</span></p><p>Fiston <span>le cousin qui vérifie</span></p><p>Kimia <span>qui transfère à son église</span></p><p>@VraiKin243 <span>40 128 abonnés</span></p><p>Et ton cerveau rapide <span>dans le rôle du wewa</span></p></div>
+      <div><h4>Voix</h4><p>Fatou <span>Ya Mado</span></p><p>Bakumba <span>le narrateur</span></p><p>Isac <span>l'audio</span></p><p><span>Voix de synthèse ElevenLabs</span></p></div>
+      <div><h4>Musique</h4><p>Antonio Vivaldi<br>Les Quatre Saisons · L'Été et L'Hiver</p><p><span>John Harrison, violon<br>Wichita State University Chamber Players, direction Robert Turizziani<br>Enregistrement sous licence CC BY-SA, extraits sous la même licence</span></p></div>
       <div><h4>D'après les travaux de</h4><p>Daniel Simons et Christopher Chabris<br>Elizabeth Loftus et John Palmer<br>Shane Frederick</p></div>
       <div><h4>Une production</h4><p>BONGO · Académie de l'esprit critique<br>Kinshasa, 2026</p></div>
       <div><p><span>Les personnes, entreprises et comptes de cet épisode sont fictifs.<br>Aucun cerveau n'a été maltraité, sauf le tien, un peu.</span></p></div>
@@ -1700,7 +1712,7 @@ function missionHTML(full) {
   </div>
   <p class="lbl" style="margin:6px 0 0">Ce que nous attendons de toi</p>
   <div class="mvals"><div><b>Sois franc</b><span>Une critique sincère vaut plus qu'un compliment poli.</span></div><div><b>Sois toi-même</b><span>Il n'y a ni bonne ni mauvaise façon de vivre l'épisode.</span></div><div><b>Garde le secret</b><span>Ne raconte pas l'épisode : la surprise fait partie du test.</span></div></div>
-  <p class="small">Écouteurs conseillés · environ 3 Mo de données, voix comprises · idéalement en une seule fois, au calme.</p>`;
+  <p class="small">Écouteurs conseillés · environ 4 Mo de données, voix et musique comprises · idéalement en une seule fois, au calme.</p>`;
 }
 function missionPage(next) {
   mode("gate"); setBackdrop("");
@@ -1769,7 +1781,7 @@ function home() {
   <section class="mcard"><div><p class="eyebrow">Ta mission de testeur</p><p>${FB_ON ? "Regarder l'épisode 1 en entier et donner ton avis en onze questions : tes résultats partent tout seuls au coordinateur." : "Regarder l'épisode 1 en entier, donner ton avis en onze questions, renvoyer ton code de résultats."}</p></div><button class="btn ghost" id="mrev" type="button">Revoir ma mission</button></section>
   <section class="rail" id="railS1"><h3>Saison 1 · Ne te fais plus avoir <small>6 épisodes · les 3 premiers gratuits</small></h3><div class="rscroll">${EPS.map(epPoster).join("")}</div></section>
   <section class="rail" id="railTraps"><h3>Les douze pièges à collectionner <small>${met.length} sur 12 débloqué${met.length > 1 ? "s" : ""}</small></h3><div class="rscroll">${Object.keys(TRAPS).map((k, i) => trapTile(k, i, met)).join("")}</div></section>
-  <footer class="foot"><p>Pilote privé destiné au panel de test. Les personnes, entreprises et comptes de cet épisode sont fictifs.</p><p id="coordLink" hidden><a href="#coordination">Espace coordinateur du panel</a></p></footer>`);
+  <footer class="foot"><p>Pilote privé destiné au panel de test. Les personnes, entreprises et comptes de cet épisode sont fictifs.</p><p>Musique : Antonio Vivaldi, <i>Les Quatre Saisons</i>, par John Harrison (violon) et le Wichita State University Chamber Players, sous licence <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.fr" target="_blank" rel="noopener">CC BY-SA</a>. Voix : ElevenLabs.</p><p id="coordLink" hidden><a href="#coordination">Espace coordinateur du panel</a></p></footer>`);
   isOwner().then((ok) => { const c = $("#coordLink"); if (ok && c) c.hidden = false; });
   $("#play").onclick = () => play();
   $("#info").onclick = () => details(1);
@@ -1778,7 +1790,7 @@ function home() {
 }
 function play() {
   const sh = $("#sheet"); if (sh) sh.remove();
-  ac(); vUnlock();
+  ac(); vUnlock(); vWarmStart();
   try { if ("speechSynthesis" in window && S.voice) { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } } catch (e) {}
   try { if (window.matchMedia && matchMedia("(pointer:coarse)").matches && document.documentElement.requestFullscreen && !document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); } catch (e) {}
   try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(() => {}); } catch (e) {}
@@ -1790,7 +1802,7 @@ function details(n = 1) {
   const e = EPS[n - 1]; const old = $("#sheet"); if (old) old.remove();
   const doneIdx = S.done ? 99 : STEPS.indexOf(S.step);
   const sh = document.createElement("div"); sh.className = "sheet"; sh.id = "sheet";
-  sh.innerHTML = `<div class="sheet-in" role="dialog" aria-modal="true" aria-label="${esc(e.t)}"><div class="sh-art"><div class="art">${n === 1 ? BILL() : e.art()}</div><button class="sh-x" id="shx" aria-label="Fermer">×</button></div><div class="sh-body"><p class="series">Saison 1 · Épisode ${n}</p><h2>${esc(e.t)}</h2><p class="meta">${n === 1 ? `<span class="new">Nouveau</span>` : `<span class="new">Bientôt</span>`}<span>2026</span><span class="age">16+</span><span>${n === 1 ? "≈ 25 min" : n === 6 ? "Finale de saison" : "Un épisode par semaine"}</span><span class="${n <= 3 ? "free" : "pass"}">${n <= 3 ? "Gratuit" : "Pass saison"}</span></p><div class="sh-grid"><div style="display:grid;gap:14px;align-content:start"><p>${esc(e.syn)}</p>${n === 1 ? `<button class="btn gold" id="shplay">${ICON.play}${playLabel()}</button>` : (n <= 3 ? `<p class="small">Épisode gratuit, disponible pour le panel au prochain test. Les épisodes 1 à 3 de la saison sont offerts.</p>` : `<p class="small">Inclus dans le Pass saison : un seul paiement débloque les épisodes 4 à 6, sans abonnement.</p>`)}</div><div class="sh-side"><p><b>Avec :</b> ${n === 1 ? "Ya Mado, Tonton Dédé, Tante Annie, Maman Bijou, Fiston, Kimia, et toi." : n === 3 ? "Ya Mado, Grâce, le chef d'agence, et toi." : n === 6 ? "Ya Mado, Junior, @VraiKin243, et toi." : "Ya Mado, Junior, Grâce, et toi."}</p><p><b>Genres :</b> thriller familial, rumeurs, Kinshasa.</p><p><b>Cette série est :</b> haletante, déroutante, kinoise.</p><p><b>Conseils :</b> écouteurs, environ 3 Mo de données, voix comprises.</p></div></div>${n === 1 ? `<div><p class="lbl">Chapitres</p><div class="chlist">${CHAPS.map(([k, num, t, d, du]) => `<div class="chrow ${doneIdx > STEPS.indexOf(k) ? "done" : ""}"><span class="n">${num}</span><div><b>${esc(t)}</b><span>${esc(d)}</span></div><span class="d">${doneIdx > STEPS.indexOf(k) ? "Vu" : du}</span></div>`).join("")}</div></div>` : ""}</div></div>`;
+  sh.innerHTML = `<div class="sheet-in" role="dialog" aria-modal="true" aria-label="${esc(e.t)}"><div class="sh-art"><div class="art">${n === 1 ? BILL() : e.art()}</div><button class="sh-x" id="shx" aria-label="Fermer">×</button></div><div class="sh-body"><p class="series">Saison 1 · Épisode ${n}</p><h2>${esc(e.t)}</h2><p class="meta">${n === 1 ? `<span class="new">Nouveau</span>` : `<span class="new">Bientôt</span>`}<span>2026</span><span class="age">16+</span><span>${n === 1 ? "≈ 25 min" : n === 6 ? "Finale de saison" : "Un épisode par semaine"}</span><span class="${n <= 3 ? "free" : "pass"}">${n <= 3 ? "Gratuit" : "Pass saison"}</span></p><div class="sh-grid"><div style="display:grid;gap:14px;align-content:start"><p>${esc(e.syn)}</p>${n === 1 ? `<button class="btn gold" id="shplay">${ICON.play}${playLabel()}</button>` : (n <= 3 ? `<p class="small">Épisode gratuit, disponible pour le panel au prochain test. Les épisodes 1 à 3 de la saison sont offerts.</p>` : `<p class="small">Inclus dans le Pass saison : un seul paiement débloque les épisodes 4 à 6, sans abonnement.</p>`)}</div><div class="sh-side"><p><b>Avec :</b> ${n === 1 ? "Ya Mado, Tonton Dédé, Tante Annie, Maman Bijou, Fiston, Kimia, et toi." : n === 3 ? "Ya Mado, Grâce, le chef d'agence, et toi." : n === 6 ? "Ya Mado, Junior, @VraiKin243, et toi." : "Ya Mado, Junior, Grâce, et toi."}</p><p><b>Genres :</b> thriller familial, rumeurs, Kinshasa.</p><p><b>Cette série est :</b> haletante, déroutante, kinoise.</p><p><b>Conseils :</b> écouteurs, environ 4 Mo de données, voix et musique comprises.</p></div></div>${n === 1 ? `<div><p class="lbl">Chapitres</p><div class="chlist">${CHAPS.map(([k, num, t, d, du]) => `<div class="chrow ${doneIdx > STEPS.indexOf(k) ? "done" : ""}"><span class="n">${num}</span><div><b>${esc(t)}</b><span>${esc(d)}</span></div><span class="d">${doneIdx > STEPS.indexOf(k) ? "Vu" : du}</span></div>`).join("")}</div></div>` : ""}</div></div>`;
   document.body.appendChild(sh);
   const close = () => sh.remove();
   $("#shx").onclick = close; sh.onclick = (ev) => { if (ev.target === sh) close(); };
@@ -2269,7 +2281,7 @@ function syncInvites() {
 
 
 /* ---------- Voix naturelles (enregistrées avec ElevenLabs) ---------- */
-const VOICE_CLIPS = [["Tu viens de voir ton cerveau te mentir, en direct. Il le fait tous les jours, sur WhatsApp, au marché, au travail.", "voix/e1-mado-01.mp3"], ["La bonne nouvelle, c'est qu'il s'entraîne. Maintenant, on commence.", "voix/e1-mado-02.mp3"], ["Samedi vingt-huit novembre, vingt et une heures quatre. Lemba.", "voix/e1-narr-01.mp3"], ["Le courant vient encore de partir.", "voix/e1-narr-02.mp3"], ["Dans le groupe de la famille, un audio de deux minutes.", "voix/e1-narr-03.mp3"], ["Une voix d'homme, posée, sûre d'elle.", "voix/e1-narr-04.mp3"], ["Bonsoir la famille. C'est confirmé : la société d'électricité coupe tout Kinshasa à partir de lundi. Trois jours. Ils réparent la ligne d'Inga.", "voix/e1-rumor-01.mp3"], ["La régie des eaux suit : sans courant, les pompes s'arrêtent. Faites des réserves. Transférez avant que ce soit supprimé.", "voix/e1-rumor-02.mp3"], ["Tante Annie rappelle la coupure d'octobre : deux jours sans courant à Lemba. Tout le monde s'en souvient.", "voix/e1-narr-05.mp3"], ["Maman Bijou a déjà transféré. Tonton Dédé confirme : son collègue travaille là-bas.", "voix/e1-narr-06.mp3"], ["Ta grande sœur demande s'il faut acheter des bidons.", "voix/e1-narr-07.mp3"], ["Ton pouce est sur « Transférer ». Tu as sept secondes.", "voix/e1-narr-08.mp3"], ["Trop tard : ton pouce a glissé. Le message part dans quatre groupes, 312 personnes. Tu viens de devenir un relais.", "voix/e1-narr-09.mp3"], ["Ton message part dans quatre groupes : 312 personnes. Tu viens de devenir un relais.", "voix/e1-narr-10.mp3"], ["Ton « à vérifier » a disparu dès le transfert suivant. Les gens font circuler l'audio, pas ta prudence. Et ton nom, en tête de chaîne, lui donne du crédit.", "voix/e1-narr-11.mp3"], ["Tu demandes qui a enregistré l'audio. Un silence. Puis tonton Dédé : « Tu doutes de ton oncle, maintenant ? »", "voix/e1-narr-12.mp3"], ["Tu ne transfères pas, c'est déjà beaucoup. Mais tu n'as rien vérifié, et ta sœur achète huit bidons.", "voix/e1-narr-13.mp3"], ["Sept secondes, avec ta famille qui te presse. C'est exactement ainsi que les rumeurs gagnent : par la pression, pas par la preuve.", "voix/e1-mado-03.mp3"], ["Ton cerveau rapide t'a sauvé mille fois devant un taxi-bus qui fonce.", "voix/e1-mado-04.mp3"], ["Mais devant un audio, il est aveugle. Il entend la peur, il entend « transférez », il entend le souvenir d'octobre, et il obéit.", "voix/e1-mado-05.mp3"], ["Et si, dans cet audio, il y avait un peu de vrai ? Ce serait pire.", "voix/e1-crochet-01.mp3"], ["Regarde la chaîne : un directeur, son chauffeur, le petit frère, un collègue, ton oncle. Plus elle est longue, plus elle parle fort.", "voix/e1-mado-06.mp3"], ["Et regarde l'avis officiel. Il ne confirme pas l'audio : il en montre le grain de vérité. Six heures dans deux communes sont devenues trois jours dans toute la ville.", "voix/e1-mado-07.mp3"], ["Une rumeur est rarement fausse à cent pour cent. Elle est vraie à vingt pour cent, et c'est ce qui la rend dangereuse.", "voix/e1-mado-08.mp3"], ["9 h 30. Un deuxième document circule : un communiqué complet, en-tête, tampon, signature. Il parle de 72 heures. L'avis de Fiston parlait de 6. L'un des deux est faux.", "voix/e1-crochet-02.mp3"], ["Un faussaire soigne ce qu'il croit qu'on regarde : le logo, le tampon. Il néglige ce que personne ne regarde : le calendrier.", "voix/e1-mado-09.mp3"], ["Et note la différence entre un signal fort et une preuve. L'adresse gmail te fait douter ; le mardi te permet de conclure.", "voix/e1-mado-10.mp3"], ["Tu as ouvert le calendrier. C'est le geste des professionnels : ils ne se fient pas à leur mémoire, ils vérifient.", "voix/e1-mado-11.mp3"], ["Tu avais un calendrier à portée de main. Dans la vie aussi : ton téléphone en a un. Vérifier prend cinq secondes.", "voix/e1-mado-12.mp3"], ["Tu envoies le calendrier dans le groupe. Personne ne réagit. Une heure plus tard, le faux communiqué dépasse 9 000 partages.", "voix/e1-crochet-03.mp3"], ["Lundi 30 novembre, 15 heures, à Matonge. Le courant est revenu à 14 heures, comme l'annonçait l'avis officiel.", "voix/e1-narr-14.mp3"], ["Six heures de coupure. Deux communes. Pas trois jours, pas toute la ville.", "voix/e1-narr-15.mp3"], ["Alors, l'audio de samedi avait raison, ou tort ?", "voix/e1-mado-13.mp3"], ["Raison ? Il annonçait trois jours dans toute la ville, et l'eau. Il avait raison sur un mot, et tort sur tout le reste.", "voix/e1-mado-14.mp3"], ["Tort ? Ta tante a vécu six heures sans courant. Si tu lui dis « fake », tu perds toute crédibilité.", "voix/e1-mado-15.mp3"], ["Exactement. Un fait vrai, gonflé. C'est la recette de presque toutes les rumeurs.", "voix/e1-mado-16.mp3"], ["Pourquoi ton cerveau a-t-il marché ? Parce qu'il a deux conducteurs. Le premier, c'est un wewa : rapide, il se faufile, il décide sans réfléchir.", "voix/e1-mado-17.mp3"], ["Le second, c'est un chauffeur prudent. Lent, il regarde la carte, il vérifie.", "voix/e1-mado-18.mp3"], ["Le wewa prend le volant dans quatre situations.", "voix/e1-mado-19.mp3"], ["Quand tu as peur.", "voix/e1-mado-20.mp3"], ["Quand c'est urgent.", "voix/e1-mado-21.mp3"], ["Quand tout le monde fait pareil.", "voix/e1-mado-22.mp3"], ["Et quand il reconnaît un grain de vrai, comme le souvenir d'octobre. Ton audio avait les quatre.", "voix/e1-mado-23.mp3"], ["Nos anciens le savaient. Amadou Hampâté Bâ rappelait que, chez les maîtres de la parole, on savait de qui l'on tenait un récit.", "voix/e1-mado-24.mp3"], ["Et l'on répondait de sa parole. Ton audio n'a pas de maître. Personne n'en répond.", "voix/e1-mado-25.mp3"], ["Retiens quatre questions avant de transférer. Qui le dit ? Comment le sait-il ? Que se passe-t-il si j'attends une heure ? Et qu'est-ce qui est vrai, exactement, et qu'est-ce qui a été ajouté ?", "voix/e1-mado-26.mp3"], ["15 h 20. Le compte qui a lancé l'audio crie victoire.", "voix/e1-narr-16.mp3"], ["« Ils ont reculé grâce à nous. » Il n'y a jamais eu trois jours de prévus. Mais comment le prouver à quarante mille abonnés ?", "voix/e1-crochet-04.mp3"], ["Un menteur seul, c'est un bavard. Un menteur qui a quarante mille relais, c'est une entreprise. Et celle-ci a compris une chose : le vrai qu'elle publie fait passer le faux.", "voix/e1-mado-27.mp3"], ["Chaque publication se juge seule. Jamais le compte en bloc.", "voix/e1-mado-28.mp3"], ["Junior. Ton meilleur ami. Et ce matin, Junior a publié : « Je vous l'avais dit, il y a eu une coupure. »", "voix/e1-crochet-05.mp3"]];
+const VOICE_CLIPS = [["Prologue. Ton cerveau te ment-il ? La vidéo ne passe qu'une fois. Elle a été conçue pour te tromper. Ta mission : compte les passes du sachet jaune entre les vendeurs en tablier bleu. Ignore le ballon blanc des vendeurs en tablier blanc.", "voix/e1-card-01.mp3"], ["Trois questions éclair. Écris un nombre. La première réponse qui te vient n'est pas forcément la bonne.", "voix/e1-card-02.mp3"], ["Tu viens de voir ton cerveau te mentir, en direct. Il le fait tous les jours, sur WhatsApp, au marché, au travail.", "voix/e1-mado-01.mp3"], ["La bonne nouvelle, c'est qu'il s'entraîne. Maintenant, on commence.", "voix/e1-mado-02.mp3"], ["Chapitre un. L'audio. Samedi soir à Lemba. Un audio arrive dans le groupe de la famille. Tu auras sept secondes, et ta famille ne te laissera pas réfléchir.", "voix/e1-card-03.mp3"], ["Samedi vingt-huit novembre, vingt et une heures quatre. Lemba.", "voix/e1-narr-01.mp3"], ["Le courant vient encore de partir.", "voix/e1-narr-02.mp3"], ["Dans le groupe de la famille, un audio de deux minutes.", "voix/e1-narr-03.mp3"], ["Une voix d'homme, posée, sûre d'elle.", "voix/e1-narr-04.mp3"], ["Bonsoir la famille. C'est confirmé : la société d'électricité coupe tout Kinshasa à partir de lundi. Trois jours. Ils réparent la ligne d'Inga.", "voix/e1-rumor-01.mp3"], ["La régie des eaux suit : sans courant, les pompes s'arrêtent. Faites des réserves. Transférez avant que ce soit supprimé.", "voix/e1-rumor-02.mp3"], ["Tante Annie rappelle la coupure d'octobre : deux jours sans courant à Lemba. Tout le monde s'en souvient.", "voix/e1-narr-05.mp3"], ["Maman Bijou a déjà transféré. Tonton Dédé confirme : son collègue travaille là-bas.", "voix/e1-narr-06.mp3"], ["Ta grande sœur demande s'il faut acheter des bidons.", "voix/e1-narr-07.mp3"], ["Ton pouce est sur « Transférer ». Tu as sept secondes.", "voix/e1-narr-08.mp3"], ["Trop tard : ton pouce a glissé. Le message part dans quatre groupes, 312 personnes. Tu viens de devenir un relais.", "voix/e1-narr-09.mp3"], ["Ton message part dans quatre groupes : 312 personnes. Tu viens de devenir un relais.", "voix/e1-narr-10.mp3"], ["Ton « à vérifier » a disparu dès le transfert suivant. Les gens font circuler l'audio, pas ta prudence. Et ton nom, en tête de chaîne, lui donne du crédit.", "voix/e1-narr-11.mp3"], ["Tu demandes qui a enregistré l'audio. Un silence. Puis tonton Dédé : « Tu doutes de ton oncle, maintenant ? »", "voix/e1-narr-12.mp3"], ["Tu ne transfères pas, c'est déjà beaucoup. Mais tu n'as rien vérifié, et ta sœur achète huit bidons.", "voix/e1-narr-13.mp3"], ["Sept secondes, avec ta famille qui te presse. C'est exactement ainsi que les rumeurs gagnent : par la pression, pas par la preuve.", "voix/e1-mado-03.mp3"], ["Ton cerveau rapide t'a sauvé mille fois devant un taxi-bus qui fonce.", "voix/e1-mado-04.mp3"], ["Mais devant un audio, il est aveugle. Il entend la peur, il entend « transférez », il entend le souvenir d'octobre, et il obéit.", "voix/e1-mado-05.mp3"], ["Et si, dans cet audio, il y avait un peu de vrai ? Ce serait pire.", "voix/e1-crochet-01.mp3"], ["Chapitre deux. Le collègue de tonton Dédé. Dimanche matin. Le groupe de la famille s'agite. Tu devras répondre deux fois, et la deuxième fois, quelqu'un aura une « preuve ».", "voix/e1-card-04.mp3"], ["Regarde la chaîne : un directeur, son chauffeur, le petit frère, un collègue, ton oncle. Plus elle est longue, plus elle parle fort.", "voix/e1-mado-06.mp3"], ["Et regarde l'avis officiel. Il ne confirme pas l'audio : il en montre le grain de vérité. Six heures dans deux communes sont devenues trois jours dans toute la ville.", "voix/e1-mado-07.mp3"], ["Une rumeur est rarement fausse à cent pour cent. Elle est vraie à vingt pour cent, et c'est ce qui la rend dangereuse.", "voix/e1-mado-08.mp3"], ["9 h 30. Un deuxième document circule : un communiqué complet, en-tête, tampon, signature. Il parle de 72 heures. L'avis de Fiston parlait de 6. L'un des deux est faux.", "voix/e1-crochet-02.mp3"], ["Chapitre trois. Le tampon. Le communiqué des 72 heures, en plein écran. Marque tout ce qui te gêne. Puis tu devras désigner la seule preuve. Cinquante secondes.", "voix/e1-card-05.mp3"], ["Un faussaire soigne ce qu'il croit qu'on regarde : le logo, le tampon. Il néglige ce que personne ne regarde : le calendrier.", "voix/e1-mado-09.mp3"], ["Et note la différence entre un signal fort et une preuve. L'adresse gmail te fait douter ; le mardi te permet de conclure.", "voix/e1-mado-10.mp3"], ["Tu as ouvert le calendrier. C'est le geste des professionnels : ils ne se fient pas à leur mémoire, ils vérifient.", "voix/e1-mado-11.mp3"], ["Tu avais un calendrier à portée de main. Dans la vie aussi : ton téléphone en a un. Vérifier prend cinq secondes.", "voix/e1-mado-12.mp3"], ["Tu envoies le calendrier dans le groupe. Personne ne réagit. Une heure plus tard, le faux communiqué dépasse 9 000 partages.", "voix/e1-crochet-03.mp3"], ["Chapitre quatre. Le wewa et le chauffeur. Lundi après-midi, chez Ya Mado. La coupure a bien eu lieu. Alors, qui avait raison ?", "voix/e1-card-06.mp3"], ["Lundi 30 novembre, 15 heures, à Matonge. Le courant est revenu à 14 heures, comme l'annonçait l'avis officiel.", "voix/e1-narr-14.mp3"], ["Six heures de coupure. Deux communes. Pas trois jours, pas toute la ville.", "voix/e1-narr-15.mp3"], ["Alors, l'audio de samedi avait raison, ou tort ?", "voix/e1-mado-13.mp3"], ["Raison ? Il annonçait trois jours dans toute la ville, et l'eau. Il avait raison sur un mot, et tort sur tout le reste.", "voix/e1-mado-14.mp3"], ["Tort ? Ta tante a vécu six heures sans courant. Si tu lui dis « fake », tu perds toute crédibilité.", "voix/e1-mado-15.mp3"], ["Exactement. Un fait vrai, gonflé. C'est la recette de presque toutes les rumeurs.", "voix/e1-mado-16.mp3"], ["Pourquoi ton cerveau a-t-il marché ? Parce qu'il a deux conducteurs. Le premier, c'est un wewa : rapide, il se faufile, il décide sans réfléchir.", "voix/e1-mado-17.mp3"], ["Le second, c'est un chauffeur prudent. Lent, il regarde la carte, il vérifie.", "voix/e1-mado-18.mp3"], ["Le wewa prend le volant dans quatre situations.", "voix/e1-mado-19.mp3"], ["Quand tu as peur.", "voix/e1-mado-20.mp3"], ["Quand c'est urgent.", "voix/e1-mado-21.mp3"], ["Quand tout le monde fait pareil.", "voix/e1-mado-22.mp3"], ["Et quand il reconnaît un grain de vrai, comme le souvenir d'octobre. Ton audio avait les quatre.", "voix/e1-mado-23.mp3"], ["Nos anciens le savaient. Amadou Hampâté Bâ rappelait que, chez les maîtres de la parole, on savait de qui l'on tenait un récit.", "voix/e1-mado-24.mp3"], ["Et l'on répondait de sa parole. Ton audio n'a pas de maître. Personne n'en répond.", "voix/e1-mado-25.mp3"], ["Retiens quatre questions avant de transférer. Qui le dit ? Comment le sait-il ? Que se passe-t-il si j'attends une heure ? Et qu'est-ce qui est vrai, exactement, et qu'est-ce qui a été ajouté ?", "voix/e1-mado-26.mp3"], ["15 h 20. Le compte qui a lancé l'audio crie victoire.", "voix/e1-narr-16.mp3"], ["« Ils ont reculé grâce à nous. » Il n'y a jamais eu trois jours de prévus. Mais comment le prouver à quarante mille abonnés ?", "voix/e1-crochet-04.mp3"], ["Chapitre cinq. @VraiKin243. Le compte qui a lancé l'audio. Il publie du faux, mais pas seulement. Classe chaque publication, puis décide quoi faire de ce compte.", "voix/e1-card-07.mp3"], ["Un menteur seul, c'est un bavard. Un menteur qui a quarante mille relais, c'est une entreprise. Et celle-ci a compris une chose : le vrai qu'elle publie fait passer le faux.", "voix/e1-mado-27.mp3"], ["Chaque publication se juge seule. Jamais le compte en bloc.", "voix/e1-mado-28.mp3"], ["Junior. Ton meilleur ami. Et ce matin, Junior a publié : « Je vous l'avais dit, il y a eu une coupure. »", "voix/e1-crochet-05.mp3"], ["Le Verdict du samedi. Des situations nouvelles. Plusieurs réponses sont défendables ; une seule est la meilleure. Annoncer « certain » ne rapporte que si tu as plus de 80 % de chances d'avoir raison.", "voix/e1-card-08.mp3"]];
 const vKey = (t) => String(t || "").normalize("NFC").replace(/\s+/g, " ").trim();
 const VLIST = (VOICE_CLIPS || []).map(([t, f]) => [vKey(t), f]);
 const VMAP = new Map(VLIST);
@@ -2280,6 +2292,7 @@ function vEl() { if (!VC.el) { VC.el = new Audio(); VC.el.preload = "auto"; } re
 /* Un seul lecteur pour toutes les répliques : débloqué une fois au premier geste, il le reste sur iPhone. */
 function vUnlock() { if (!HAS_VOICES || VC.unlocked || FAST) return; const e = vEl(); try { e.src = "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYwLjE2LjEwMAAAAAAAAAAAAAAA//NwwAAAAAAAAAAAAEluZm8AAAAPAAAACAAAA/oAR0dHR0dHR0dHR0dHYmJiYmJiYmJiYmJifHx8fHx8fHx8fHx8fJaWlpaWlpaWlpaWlrGxsbGxsbGxsbGxsbHLy8vLy8vLy8vLy8vl5eXl5eXl5eXl5eXl////////////////AAAAAExhdmM2MC4zMQAAAAAAAAAAAAAAACQC1AAAAAAAAAP6yysejgAAAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NCxKMAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NAxKQAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/80LEowAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/80DEpAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsSjAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQ=="; e.muted = true; const p = e.play(); if (p && p.then) p.then(() => { e.pause(); e.muted = false; VC.unlocked = true; }, () => { e.muted = false; }); } catch (x) { e.muted = false; } }
 function vPreload(files) { if (!HAS_VOICES || FAST || !S.voice || !window.fetch) return; files.forEach((f) => { if (f && !VC.warm.has(f)) { VC.warm.add(f); fetch(vUrl(f), { mode: HOSTED ? "same-origin" : "cors" }).then((r) => r.blob()).catch(() => VC.warm.delete(f)); } }); }
+function vWarmStart() { vPreload(VLIST.slice(0, 4).map(([, x]) => x)); }
 function vStop() { const e = VC.el; if (e && !e.paused) { try { e.pause(); } catch (x) {} } if (VC.res) { const r = VC.res; VC.res = null; r(true); } }
 function vPlay(text) {
   return new Promise((res) => {
@@ -2291,7 +2304,7 @@ function vPlay(text) {
     VC.res = res; el.onended = () => done(true); el.onerror = () => done(false);
     el.src = vUrl(f); el.muted = false;
     const p = el.play(); if (p && p.catch) p.catch(() => done(false));
-    setTimeout(() => { if (!fin && el.paused && !paused) done(false); }, 9000);
+    const t0 = Date.now(); const watch = setInterval(() => { if (fin) { clearInterval(watch); return; } if (paused) return; if (!el.paused && el.currentTime > 0) { clearInterval(watch); return; } if (Date.now() - t0 > 20000) { clearInterval(watch); try { el.pause(); } catch (x) {} done(false); } }, 500);
   });
 }
 /* La voix enregistrée remplace la voix de synthèse ; sans enregistrement, on lit seulement les sous-titres. */
@@ -2302,148 +2315,64 @@ speak = function (text) { return HAS_VOICES ? vPlay(text) : Promise.resolve(fals
 }
 
 
-/* ---------- Musique : un groove kinois joué en direct (aucun fichier, aucune donnée) ---------- */
-const M_BPM = 124, M_16 = 60 / M_BPM / 4, M_VOL = 0.5;
-const MUS = { cue: "off", want: "off", timer: null, nextT: 0, step: 0, bar: 0, ducks: 0, duckT: null, g: null, nb: null, held: false };
-const mHz = (m) => 440 * Math.pow(2, (m - 69) / 12);
-/* Progressions en sol majeur : I-IV-V-IV, puis vi-IV-I-V. t = notes de la guitare solo. */
-const M_PROG = {
-  A: [{ r: 43, q: 4, t: [71, 74, 79] }, { r: 48, q: 4, t: [72, 76, 79] }, { r: 50, q: 4, t: [74, 78, 81] }, { r: 48, q: 4, t: [72, 76, 79] }],
-  B: [{ r: 40, q: 3, t: [71, 76, 79] }, { r: 48, q: 4, t: [72, 76, 79] }, { r: 43, q: 4, t: [71, 74, 79] }, { r: 50, q: 4, t: [74, 78, 81] }]
-};
-/* Motifs de sebene : indice de la note dans t, 3 = t[0] à l'octave, -1 = silence. */
-const M_LEAD = [
-  [2, 1, 0, 1, 2, 1, 0, 1, 2, 1, 0, 1, 3, 2, 1, 0],
-  [0, -1, 2, 1, 0, -1, 2, 1, 0, 1, 2, 3, 2, 1, 2, -1],
-  [2, 0, 1, 0, 2, 0, 1, 0, 3, 2, 1, 2, 1, 0, 1, -1],
-  [3, -1, 2, -1, 1, 2, 0, -1, 3, 2, 1, 0, 2, -1, 1, -1]
-];
-const M_BASS = [[0, 0, 0.3], [3, 7, 0.14], [6, 12, 0.14], [8, 0, 0.26], [11, 7, 0.14], [13, "q", 0.12], [14, 7, 0.12]];
-function mGraph() {
-  const a = ac(); if (!a) return null;
-  if (MUS.g) return MUS.g;
-  const g = {}, G = (v) => { const n = a.createGain(); n.gain.value = v; return n; };
-  g.out = G(0); g.duck = G(1); g.bus = G(1); g.dry = G(1); g.wet = G(0);
-  g.hp = a.createBiquadFilter(); g.hp.type = "highpass"; g.hp.frequency.value = 380;
-  g.lp = a.createBiquadFilter(); g.lp.type = "lowpass"; g.lp.frequency.value = 2900;
-  g.comp = a.createDynamicsCompressor(); g.comp.threshold.value = -16; g.comp.ratio.value = 3; g.comp.attack.value = 0.01; g.comp.release.value = 0.2;
-  g.bus.connect(g.dry); g.dry.connect(g.comp);
-  g.bus.connect(g.hp); g.hp.connect(g.lp); g.lp.connect(g.wet); g.wet.connect(g.comp);
-  g.comp.connect(g.duck); g.duck.connect(g.out); g.out.connect(a.destination);
-  g.dl = a.createDelay(1); g.dl.delayTime.value = M_16 * 3; g.fb = G(0.3); g.dlf = a.createBiquadFilter(); g.dlf.type = "lowpass"; g.dlf.frequency.value = 2400; g.send = G(0.32);
-  g.send.connect(g.dl); g.dl.connect(g.dlf); g.dlf.connect(g.fb); g.fb.connect(g.dl); g.dlf.connect(g.bus);
-  const len = a.sampleRate, nb = a.createBuffer(1, len, a.sampleRate), ch = nb.getChannelData(0); for (let i = 0; i < len; i++) ch[i] = Math.random() * 2 - 1; MUS.nb = nb;
-  return (MUS.g = g);
+/* ---------- Musique : Vivaldi, Les Quatre Saisons (l'Été pour le récit, l'Hiver pour les tests) ---------- */
+const MUS_FILES = { ete: "musique/vivaldi-ete.mp3", hiver: "musique/vivaldi-hiver.mp3" };
+const MUS_VOL = { ete: 0.5, hiver: 0.62 };
+const MUS = { want: "off", track: null, els: {}, gains: {}, last: {}, master: null, duck: null, on: false, ducks: 0, duckT: null, backT: null, zone: 0, web: false };
+const mUrl = (f) => (/^https?:/.test(PUBLIC_URL) && !HOSTED ? PUBLIC_URL : "") + f;
+const mTrackOf = (cue) => (cue === "off" ? null : cue === "tension" || cue === "radio" || cue === "hiver" ? "hiver" : "ete");
+function mInit() {
+  if (MUS.master || MUS.web === null) return true;
+  const a = ac();
+  for (const k of Object.keys(MUS_FILES)) { const el = new Audio(); el.crossOrigin = "anonymous"; el.loop = true; el.preload = "auto"; el.src = mUrl(MUS_FILES[k]); MUS.els[k] = el; }
+  try {
+    if (!a || !a.createMediaElementSource) throw 0;
+    MUS.master = a.createGain(); MUS.duck = a.createGain(); MUS.duck.connect(MUS.master); MUS.master.connect(a.destination);
+    for (const k of Object.keys(MUS.els)) { const g = a.createGain(); g.gain.value = 0; a.createMediaElementSource(MUS.els[k]).connect(g); g.connect(MUS.duck); MUS.gains[k] = g; }
+    MUS.web = true;
+  } catch (e) { MUS.web = false; MUS.master = { fake: 1 }; }
+  return true;
 }
-function mEnv(gn, t, peak, att, dec) { gn.gain.setValueAtTime(0.0001, t); gn.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t + att); gn.gain.exponentialRampToValueAtTime(0.0001, t + att + dec); }
-function mPan(a, x) { if (!a.createStereoPanner) return null; const p = a.createStereoPanner(); p.pan.value = x; return p; }
-function mNoise(t, dur, vol, type, f, q = 0.8, pan = 0) {
-  const a = AC, g = MUS.g, s = a.createBufferSource(), fl = a.createBiquadFilter(), gn = a.createGain();
-  s.buffer = MUS.nb; fl.type = type; fl.frequency.value = f; fl.Q.value = q; mEnv(gn, t, vol, 0.002, dur);
-  s.connect(fl); fl.connect(gn); const p = mPan(a, pan); if (p) { gn.connect(p); p.connect(g.bus); } else gn.connect(g.bus);
-  s.start(t, Math.random() * 0.8); s.stop(t + dur + 0.05);
-}
-function mOsc(t, type, f, dur, vol, opt = {}) {
-  const a = AC, g = MUS.g, o = a.createOscillator(), gn = a.createGain(); o.type = type; o.frequency.setValueAtTime(f, t);
-  if (opt.f2) o.frequency.exponentialRampToValueAtTime(opt.f2, t + (opt.glide || dur));
-  if (opt.det) o.detune.value = opt.det;
-  mEnv(gn, t, vol, opt.att || 0.004, dur);
-  let node = o;
-  if (opt.lp) { const fl = a.createBiquadFilter(); fl.type = "lowpass"; fl.Q.value = opt.q || 0.7; fl.frequency.setValueAtTime(opt.lp, t); if (opt.lp2) fl.frequency.exponentialRampToValueAtTime(opt.lp2, t + dur); o.connect(fl); node = fl; }
-  if (opt.bp) { const fl = a.createBiquadFilter(); fl.type = "bandpass"; fl.Q.value = opt.q || 1.2; fl.frequency.value = opt.bp; node.connect(fl); node = fl; }
-  node.connect(gn);
-  const p = opt.pan ? mPan(a, opt.pan) : null; if (p) { gn.connect(p); p.connect(g.bus); } else gn.connect(g.bus);
-  if (opt.send) gn.connect(g.send);
-  o.start(t); o.stop(t + (opt.att || 0.004) + dur + 0.05);
-}
-/* Instruments */
-const mKick = (t, v = 1) => { mOsc(t, "sine", 150, 0.24, 0.62 * v, { f2: 44, glide: 0.11 }); mNoise(t, 0.012, 0.12 * v, "lowpass", 1200); };
-const mSnare = (t, v = 1) => { mNoise(t, 0.13, 0.36 * v, "bandpass", 2100, 0.7, -0.05); mOsc(t, "triangle", 210, 0.07, 0.22 * v, { f2: 160 }); };
-const mHat = (t, v = 1) => mNoise(t, 0.035, 0.24 * v, "highpass", 7200, 0.7, 0.4);
-const mShk = (t, v = 1) => mNoise(t, 0.05, 0.13 * v, "bandpass", 5200, 1.4, -0.45);
-const mConga = (t, hi, v = 1) => mOsc(t, "sine", hi ? 330 : 220, 0.16, 0.32 * v, { f2: hi ? 290 : 190, glide: 0.05, pan: hi ? 0.35 : 0.2 });
-const mCrash = (t, v = 1) => mNoise(t, 1.4, 0.13 * v, "highpass", 5200, 0.6, 0.1);
-const mBass = (t, m, dur, v = 1) => { mOsc(t, "triangle", mHz(m), dur, 0.36 * v, { lp: 1100, lp2: 340, q: 1.6 }); mOsc(t, "sine", mHz(m), dur * 1.1, 0.18 * v); };
-const mLead = (t, m, v = 1) => { mOsc(t, "square", mHz(m), 0.2, 0.16 * v, { lp: 4200, lp2: 1100, q: 2.4, send: true, pan: 0.38 }); mOsc(t, "triangle", mHz(m), 0.26, 0.16 * v, { det: 8, send: true, pan: 0.3 }); };
-const mChop = (t, ms, v = 1) => ms.forEach((m, i) => mOsc(t + i * 0.006, "sawtooth", mHz(m), 0.09, 0.075 * v, { lp: 2600, lp2: 800, q: 1.1, pan: -0.45 }));
-const mPluck = (t, m, v = 1) => mOsc(t, "triangle", mHz(m), 0.55, 0.16 * v, { lp: 2600, lp2: 600, send: true, pan: -0.2 });
-const hum = () => (Math.random() - 0.5) * 0.006;
-function mStep(s, t) {
-  const cue = MUS.cue, bar = MUS.bar, sec = Math.floor(bar / 8) % 2 ? "B" : "A", ch = M_PROG[sec][bar % 4], fill = bar % 8 === 7 && s >= 12;
-  const vel = 0.85 + Math.random() * 0.15, tt = t + hum();
-  if (cue === "tension") {
-    if (s === 0 || s === 8) mKick(t, s === 0 ? 0.8 : 0.55);
-    if (s % 2 === 0) mBass(tt, s === 12 ? 43 : 40, 0.16, 0.75);
-    mShk(tt, s % 4 === 2 ? 0.9 : 0.5);
-    if (bar % 2 && (s === 0 || s === 6 || s === 10)) mPluck(tt, s === 0 ? 76 : s === 6 ? 79 : 83, 0.8);
-    if (s === 4 || s === 12) mNoise(tt, 0.05, 0.08, "bandpass", 3000, 2.2, 0.3);
-    return;
-  }
-  /* groove complet : batterie ndombolo, basse chantante, guitare rythmique et sebene */
-  if (s === 0 && bar % 8 === 0 && (bar > 0 || cue === "titles")) mCrash(t, cue === "titles" && bar === 0 ? 1.2 : 0.8);
-  if (s % 4 === 0) mKick(t, s === 0 ? 1 : 0.75);
-  if (!fill && (s === 4 || s === 12)) mSnare(tt, vel);
-  if (fill) { mSnare(tt, 0.45 + (s - 12) * 0.17); if (s === 14 || s === 15) mConga(tt + M_16 / 2, s === 14, 0.8); }
-  mHat(tt, s % 4 === 2 ? 0.9 : s % 2 ? 0.45 : 0.3);
-  mShk(tt + (s % 2 ? 0.012 : 0), s % 2 ? 0.7 : 0.45);
-  if ([3, 7, 10, 11, 15].includes(s)) mConga(tt, s === 10 || s === 11, s === 11 ? 0.6 : 0.85);
-  M_BASS.forEach(([st, iv, d]) => { if (st === s) mBass(tt, ch.r + (iv === "q" ? ch.q : iv), d, s === 0 ? 1 : 0.85); });
-  if (s % 4 === 2) mChop(tt, [ch.t[0] - 12, ch.t[1] - 12, ch.t[2] - 12], vel);
-  const lp = M_LEAD[(Math.floor(bar / 2) + (sec === "B" ? 2 : 0)) % 4], li = lp[s];
-  if (li >= 0 && !(cue === "radio" && s % 2)) { const n = li === 3 ? ch.t[0] + 12 : ch.t[li]; mLead(tt, n, (s % 4 === 0 ? 1 : 0.8) * vel); }
-}
-function mTick() {
-  const a = AC; if (!a || !MUS.g) return;
-  if (MUS.nextT < a.currentTime - 0.25) MUS.nextT = a.currentTime + 0.05;
-  while (MUS.nextT < a.currentTime + 0.2) {
-    if (MUS.step === 0 && MUS.want !== MUS.cue && MUS.want !== "off") mApply(MUS.want, MUS.nextT);
-    try { mStep(MUS.step, MUS.nextT); } catch (e) {}
-    MUS.nextT += M_16; MUS.step = (MUS.step + 1) % 16; if (MUS.step === 0) MUS.bar++;
+function mLevel(k) { return S.music === false || paused || document.hidden ? 0 : MUS.track === k ? MUS_VOL[k] : 0; }
+function mApply(fast) {
+  const a = AC, tau = fast ? 0.12 : 0.6;
+  for (const k of Object.keys(MUS.els)) {
+    const v = mLevel(k), el = MUS.els[k];
+    if (MUS.web && a) { const g = MUS.gains[k].gain; g.cancelScheduledValues(a.currentTime); g.setTargetAtTime(v, a.currentTime, tau); }
+    else el.volume = Math.max(0, Math.min(1, v * (MUS.ducks ? 0.3 : 1)));
+    if (v > 0) MUS.last[k] = Date.now();
   }
 }
-function mApply(cue, t) {
-  const g = MUS.g; MUS.cue = cue; if (cue === "titles") MUS.bar = 0;
-  const radio = cue === "radio";
-  g.dry.gain.setTargetAtTime(radio ? 0 : 1, t, 0.08); g.wet.gain.setTargetAtTime(radio ? 1.25 : 0, t, 0.08);
-  g.out.gain.setTargetAtTime(mLevel(), t, 0.25);
-}
-function mLevel() { return S.music === false || paused || document.hidden ? 0 : (MUS.cue === "tension" ? 0.62 : MUS.cue === "radio" ? 0.75 : 1) * M_VOL; }
-function mStart() {
-  if (FAST || MUS.timer || S.music === false || paused || document.hidden) return;
-  const a = ac(), g = mGraph(); if (!a || !g) return;
-  MUS.cue = MUS.want; MUS.step = 0; MUS.nextT = a.currentTime + 0.08; if (MUS.cue === "titles") MUS.bar = 0;
-  mApply(MUS.cue, a.currentTime);
-  g.out.gain.cancelScheduledValues(a.currentTime); g.out.gain.setValueAtTime(0.0001, a.currentTime); g.out.gain.setTargetAtTime(mLevel(), a.currentTime, 0.3);
-  MUS.timer = setInterval(mTick, 40); mTick();
-}
-function mStop(fade = 0.5) {
-  const a = AC, g = MUS.g; clearInterval(MUS.timer); MUS.timer = null;
-  if (a && g) { g.out.gain.cancelScheduledValues(a.currentTime); g.out.gain.setTargetAtTime(0, a.currentTime, fade / 3); }
-}
+function mPlayAll() { for (const el of Object.values(MUS.els)) { try { const p = el.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {} } MUS.on = true; }
+function mPauseAll() { for (const el of Object.values(MUS.els)) { try { el.pause(); } catch (e) {} } MUS.on = false; }
 function musicCue(cue) {
-  MUS.want = cue;
-  if (cue === "off") { if (MUS.timer) mStop(0.8); MUS.cue = "off"; return; }
-  if (!MUS.timer) mStart();
-  else if (cue === "titles" && MUS.cue !== "titles") { MUS.step = 0; MUS.nextT = AC.currentTime + 0.05; mApply("titles", AC.currentTime); }
+  if (FAST) return;
+  MUS.want = cue; clearTimeout(MUS.backT);
+  const t = mTrackOf(cue);
+  if (!t) { MUS.track = null; mApply(); setTimeout(() => { if (MUS.want === "off") mPauseAll(); }, 1400); return; }
+  mInit(); ac();
+  if (t !== MUS.track) { const el = MUS.els[t]; if (el && Date.now() - (MUS.last[t] || 0) > 8000) { try { el.currentTime = 0; } catch (e) {} } MUS.track = t; }
+  if (!MUS.on && S.music !== false && !paused && !document.hidden) mPlayAll();
+  mApply();
 }
-function musicMode(m) { if (m === "player" || m === "story") { if (MUS.want === "off") musicCue("groove"); } else musicCue("off"); }
-function musicPause(v) { if (v) { if (MUS.timer) mStop(0.3); } else if (MUS.want !== "off") mStart(); }
+function mBackToStory() { clearTimeout(MUS.backT); MUS.backT = setTimeout(() => { if (!MUS.zone && MUS.want === "hiver") musicCue("ete"); }, 1600); }
+function musicMode(m) { if (m === "player" || m === "story") { if (MUS.want === "off") musicCue("ete"); } else musicCue("off"); }
+function musicPause(v) { if (MUS.want === "off") return; if (v) { mApply(true); setTimeout(() => { if (paused) mPauseAll(); }, 300); } else { if (S.music !== false && !document.hidden) mPlayAll(); mApply(); } }
 function musicDuck(on) {
-  const a = AC, g = MUS.g; MUS.ducks = Math.max(0, MUS.ducks + (on ? 1 : -1)); clearTimeout(MUS.duckT);
-  if (!a || !g) return;
-  if (MUS.ducks) g.duck.gain.setTargetAtTime(0.28, a.currentTime, 0.08);
-  else MUS.duckT = setTimeout(() => { if (!MUS.ducks && MUS.g) MUS.g.duck.gain.setTargetAtTime(1, AC.currentTime, 0.35); }, 350);
+  MUS.ducks = Math.max(0, MUS.ducks + (on ? 1 : -1)); clearTimeout(MUS.duckT);
+  const set = (v, tau) => { if (MUS.web && AC && MUS.duck) MUS.duck.gain.setTargetAtTime(v, AC.currentTime, tau); else mApply(true); };
+  if (MUS.ducks) set(0.3, 0.12); else MUS.duckT = setTimeout(() => { if (!MUS.ducks) set(1, 0.5); }, 400);
 }
-function musicToggle() { if (S.music === false) { mStop(0.3); } else if (MUS.want !== "off") mStart(); }
-document.addEventListener("visibilitychange", () => { if (document.hidden) { if (MUS.timer) mStop(0.2); } else if (MUS.want !== "off") mStart(); });
+function musicToggle() { if (MUS.want === "off") return; if (S.music === false) { mApply(true); setTimeout(() => { if (S.music === false) mPauseAll(); }, 400); } else { mPlayAll(); mApply(); } }
+document.addEventListener("visibilitychange", () => { if (MUS.want === "off") return; if (document.hidden) { mApply(true); mPauseAll(); } else if (S.music !== false && !paused) { mPlayAll(); mApply(); } });
 /* Branchements sur le déroulé de l'épisode */
 {
   const speak0 = speak; speak = function (text, kind) { try { if (window.__voiceLog) window.__voiceLog.push([kind || "narr", String(text)]); } catch (e) {} musicDuck(true); return speak0(text, kind).then((r) => { musicDuck(false); return r; }, () => { musicDuck(false); return false; }); };
-  const ask0 = ask; ask = function (...args) { const prev = MUS.want === "tension" ? "groove" : MUS.want; if (prev !== "off") musicCue("tension"); return ask0(...args).finally(() => { if (MUS.want === "tension") musicCue(prev === "radio" ? "groove" : prev); }); };
-  const pm0 = playMarket; playMarket = function (...args) { if (MUS.want !== "off") musicCue("radio"); return pm0(...args); };
-  const ot0 = openingTitles; openingTitles = async function (...args) { musicCue("titles"); try { return await ot0(...args); } finally { if (MUS.want === "titles") musicCue("groove"); } };
+  const zone = (fn) => async function (...args) { MUS.zone++; if (MUS.want !== "off") musicCue("hiver"); try { return await fn.apply(this, args); } finally { MUS.zone--; if (!MUS.zone && MUS.want === "hiver") mBackToStory(); } };
+  ask = zone(ask); entryTest = zone(entryTest); verdict = zone(verdict);
+  const ot0 = openingTitles; openingTitles = async function (...args) { musicCue("ete"); const el = MUS.els.ete; if (el) { try { el.currentTime = 0; } catch (e) {} } return ot0.apply(this, args); };
 }
-window.__bongoMusic = () => ({ cue: MUS.cue, want: MUS.want, on: !!MUS.timer, bar: MUS.bar });
+window.__bongoMusic = () => ({ cue: MUS.want, track: MUS.track, on: MUS.on, web: MUS.web, t: MUS.track && MUS.els[MUS.track] ? Math.round(MUS.els[MUS.track].currentTime) : 0 });
 
 
 /* ---------- Démarrage ---------- */
