@@ -2087,6 +2087,7 @@ function templateHref() { return IN_CLAUDE || publicBase().startsWith("https://c
 
 /* --- Carte d'invitation --- */
 function inviteCardHTML() {
+  if (IN_CLAUDE && FIREBASE && FIREBASE.apiKey && publicCoord()) return `<section class="card" id="invcard"><p class="eyebrow">Inviter des testeurs</p><h2 style="font-size:26px">Les invitations se font sur le site protégé</h2><p class="lead">Depuis l'activation de l'accès protégé, seules les adresses inscrites sur le site public peuvent entrer, après confirmation. Ouvre ton espace coordinateur, connecte-toi avec ton adresse, puis crée tes invitations : les résultats y arrivent tout seuls.</p><a class="btn gold wide" href="${esc(publicCoord())}" target="_blank" rel="noopener">Ouvrir l'espace coordinateur protégé</a></section>`;
   let sig = "David Fidami", rep = ""; try { sig = localStorage.getItem("bongo-invsig") || sig; rep = localStorage.getItem("bongo-invrep") || ""; } catch (e) {}
   const steps = FB_ON
     ? `<p>Remplis la liste ci-dessous, colle-la depuis Excel, ou importe ton fichier Excel. Une ligne par testeur : prénom, nom, e-mail et numéro WhatsApp. <b>L'e-mail est obligatoire</b> : c'est lui qui ouvre l'accès.</p><p>Appuie sur « Créer les invitations » : chaque adresse rejoint la liste des invités. Personne d'autre ne peut entrer, même avec le lien.</p><p>Envoie chaque invitation par e-mail ou WhatsApp. Le testeur confirme son adresse, avec Google ou par un e-mail de confirmation, et ses résultats arrivent ici tout seuls.</p>`
@@ -2230,6 +2231,7 @@ function renderInvites() {
   $$("[data-del]", box).forEach((b) => (b.onclick = async () => { const k = b.dataset.del; invites.delete(k); saveInvites(); if (dbRef && canSave) { try { await dbRef.collection("invites").doc(invKey(k)).delete(); } catch (e) {} } renderInvites(); }));
 }
 function initInvites() {
+  if (!$("#lrows")) return;
   try { JSON.parse(localStorage.getItem(INV_KEY) || "[]").forEach((i) => { if (i && (i.email || i.phone) && i.code) invites.set(keyOfInv(i), i); }); } catch (e) {}
   setRows([], false);
   $("#laddrows").onclick = () => { $("#lrows").insertAdjacentHTML("beforeend", Array.from({ length: 5 }, () => rowHTML()).join("")); wireRows(); };
