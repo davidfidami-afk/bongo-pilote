@@ -4,39 +4,53 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>BONGO · Bientôt disponible</title>
-<meta name="description" content="Combien d'animaux de chaque espèce Moïse a-t-il fait entrer dans l'arche ? Réponds en trois secondes. BONGO, l'Académie de l'esprit critique. Bientôt disponible.">
+<meta name="description" content="Quatre pièges, trois secondes chacun. BONGO, l'Académie de l'esprit critique. Bientôt disponible.">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#0b0a1f">
 <meta property="og:type" content="video.other">
 <meta property="og:site_name" content="BONGO">
 <meta property="og:title" content="BONGO · Tu as trois secondes">
-<meta property="og:description" content="Un piège, une question, une série. Bientôt disponible.">
+<meta property="og:description" content="Quatre pièges, une question : comment sauver ton cerveau ? Bientôt disponible.">
 <meta property="og:image" content="https://davidfidami-afk.github.io/bongo-pilote/teaser/affiche.jpg">
 <meta property="og:image:width" content="1080">
 <meta property="og:image:height" content="1920">
 <meta property="og:video" content="https://davidfidami-afk.github.io/bongo-pilote/teaser/bongo-teaser-90s.mp4">
 <meta property="og:video:type" content="video/mp4">
-<meta property="og:video:width" content="1080">
-<meta property="og:video:height" content="1920">
 <link rel="icon" href="../favicon.png">
 <style>
-:root{--night:#0b0a1f;--navy:#141130;--yellow:#ffb703;--lilac:#bfc8ff}
+:root{--night:#0b0a1f;--navy:#141130;--yellow:#ffb703;--pink:#d81159;--lilac:#bfc8ff}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--night);color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-main{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:16px}
-.frame{width:min(100%,calc((100svh - 120px) * 9 / 16),460px);aspect-ratio:9/16;border-radius:22px;overflow:hidden;background:#000;box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 0 1px rgba(191,200,255,.15)}
+main{max-width:1100px;margin:0 auto;padding:28px 16px 48px}
+h1{margin:0 0 6px;font-size:26px;letter-spacing:.04em}
+.lead{margin:0 0 26px;color:var(--lilac);font-size:15px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px}
+article{background:var(--navy);border-radius:20px;padding:12px 12px 16px;box-shadow:0 0 0 1px rgba(191,200,255,.12)}
+.frame{aspect-ratio:9/16;border-radius:14px;overflow:hidden;background:#000}
 video{width:100%;height:100%;display:block;object-fit:cover;background:#000}
-.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-a.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:999px;font-weight:700;font-size:15px;text-decoration:none;color:var(--navy);background:var(--yellow)}
-a.btn.ghost{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px rgba(191,200,255,.4)}
-p{margin:0;color:var(--lilac);font-size:13px;text-align:center;max-width:460px;line-height:1.5}
+.n{display:inline-block;margin:14px 0 4px;font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--yellow)}
+h2{margin:0 0 6px;font-size:18px}
+article p{margin:0 0 12px;color:var(--lilac);font-size:13.5px;line-height:1.45}
+a.btn{display:inline-flex;padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;text-decoration:none;color:var(--navy);background:var(--yellow)}
+footer{margin-top:30px;color:var(--lilac);font-size:12.5px;line-height:1.55;max-width:760px}
+footer a{color:#fff}
 </style>
 </head>
 <body>
 <main>
-  <div class="frame"><video src="bongo-teaser-90s.mp4" poster="affiche.jpg" controls playsinline preload="metadata"></video></div>
-  <div class="row"><a class="btn" href="bongo-teaser-90s.mp4" download>Télécharger la vidéo</a><a class="btn ghost" href="../">Le pilote</a></div>
-  <p>Voix : ElevenLabs. Musique : Mozart, Requiem K. 626, « Lacrimosa », Herbert von Karajan, Wiener Philharmoniker et Wiener Singverein (1960), enregistrement du domaine public publié sur Wikimedia Commons.</p>
+  <h1>BONGO · Bientôt disponible</h1>
+  <p class="lead">Quatre teasers verticaux de 1 min 30, quatre pièges différents, une même question : comment sauver ton cerveau ?</p>
+  <div class="grid">
+    <article><div class="frame"><video src="bongo-teaser-90s.mp4" poster="affiche.jpg" controls playsinline preload="none"></video></div>
+      <span class="n">TEASER 1</span><h2>L'arche</h2><p>Combien d'animaux de chaque espèce Moïse a-t-il fait entrer dans l'arche ?</p><a class="btn" href="bongo-teaser-90s.mp4" download>Télécharger</a></article>
+    <article><div class="frame"><video src="bongo-teaser-2-rythme.mp4" poster="affiche2.jpg" controls playsinline preload="none"></video></div>
+      <span class="n">TEASER 2</span><h2>Le rythme</h2><p>Mille, plus quarante, plus mille… Le total ? Presque tout le monde dit cinq mille.</p><a class="btn" href="bongo-teaser-2-rythme.mp4" download>Télécharger</a></article>
+    <article><div class="frame"><video src="bongo-teaser-3-detail.mp4" poster="affiche3.jpg" controls playsinline preload="none"></video></div>
+      <span class="n">TEASER 3</span><h2>Le détail de trop</h2><p>Grâce est-elle plus probablement caissière, ou caissière et militante ?</p><a class="btn" href="bongo-teaser-3-detail.mp4" download>Télécharger</a></article>
+    <article><div class="frame"><video src="bongo-teaser-4-mot-double.mp4" poster="affiche4.jpg" controls playsinline preload="none"></video></div>
+      <span class="n">TEASER 4</span><h2>Le mot en double</h2><p>Lis ce panneau, vite. Qu'est-ce que tu as lu ?</p><a class="btn" href="bongo-teaser-4-mot-double.mp4" download>Télécharger</a></article>
+  </div>
+  <footer>Voix : ElevenLabs. Musique : Mozart, Requiem K. 626, « Lacrimosa », Herbert von Karajan, Wiener Philharmoniker et Wiener Singverein (1960), enregistrement du domaine public publié sur Wikimedia Commons. <a href="../">Retour au pilote</a></footer>
 </main>
 </body>
 </html>
