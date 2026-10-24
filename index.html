@@ -685,6 +685,59 @@ input[type=password]:focus{outline:2px solid var(--yellow);outline-offset:1px}
 @keyframes aspin{to{transform:rotate(360deg)}}
 #fbbar{margin:0 0 4px}
 body.mode-gate .top{background:rgba(11,10,31,.96)}
+.agree{max-width:560px}
+.agree h1{font-size:clamp(26px,7vw,38px);line-height:1.08}
+.agess{background:rgba(255,183,3,.08);border:1.5px solid rgba(255,183,3,.35);border-radius:14px;padding:14px 16px;display:grid;gap:8px}
+.agess>b{color:#fff;font-size:15px}
+.agess ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.agess li{font-size:14px;color:var(--lilac);line-height:1.45}
+.agess li b{color:var(--yellow)}
+.agtext{max-height:46vh;max-height:46dvh;overflow-y:auto;background:#fbfaf5;color:#22222e;border-radius:12px;padding:14px 16px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;outline:none}
+.agtext h3{font-size:14.5px;color:#141130;margin:12px 0 4px;font-weight:800}
+.agtext h3:first-child{margin-top:0}
+.pacte .agtext p{color:#22222e;font-size:14px;line-height:1.5;margin:0 0 8px}
+.agtext p b{color:#0846a0}
+.pacte .agtext p.agend{color:#5b5a70;font-style:italic;font-size:12.5px;text-align:center;margin-top:12px}
+.agrole{display:flex;gap:10px}
+.agrole label{flex:1;display:flex;gap:10px;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1.5px solid var(--line);border-radius:12px;padding:12px;font-weight:700;color:#fff;font-size:15px}
+.agrole input{accent-color:var(--yellow);width:20px;height:20px;margin:0}
+.agid{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;background:rgba(255,255,255,.05);border-radius:12px;padding:12px 14px;font-size:13px}
+.agid span{color:var(--dim)}
+.agid b{color:#fff;word-break:break-all}
+.agminor{display:grid;gap:14px;background:rgba(72,149,239,.08);border:1.5px solid rgba(72,149,239,.35);border-radius:14px;padding:14px}
+.agminor[hidden]{display:none}
+input[type=date]{background:rgba(255,255,255,.07);border:1.5px solid var(--line);border-radius:10px;color:#fff;padding:12px 13px;font:inherit;font-size:16px;width:100%;color-scheme:dark;min-height:48px}
+.sigpad{position:relative;height:190px;background:#fff;border-radius:12px;border:2px dashed rgba(20,17,48,.28);overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+.sigpad canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair;z-index:1}
+.sigpad::after{content:"";position:absolute;left:18px;right:18px;bottom:46px;border-bottom:1.5px solid rgba(20,17,48,.22);pointer-events:none}
+.sigph{position:absolute;left:0;right:0;top:42%;text-align:center;color:rgba(20,17,48,.38);font-weight:700;font-size:15px;pointer-events:none}
+.sigpad.inked .sigph{display:none}
+.sigpad .sigclr{position:absolute;right:10px;top:8px;z-index:2;color:#0846a0;font-weight:800;font-size:13px}
+.agcopy{position:fixed;inset:0;z-index:90;background:rgba(5,4,16,.88);overflow-y:auto;padding:12px 12px 40px;-webkit-overflow-scrolling:touch}
+.agbar{position:sticky;top:-12px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:12px 10px;margin:-12px -12px 12px;background:#0b0a1f;border-bottom:1px solid var(--line);z-index:2;flex-wrap:nowrap}
+.agbar .btn{padding:11px 16px;font-size:15px}
+.agpaper{max-width:760px;margin:0 auto;background:#fff;color:#22222e;border-radius:10px;padding:28px 24px;font-size:13.5px;line-height:1.5;text-align:left}
+.agpaper .aglogo{width:170px;height:auto;display:block;margin-bottom:10px}
+.agpaper h2{color:#141130;font-size:21px;margin:4px 0 2px;font-weight:800;letter-spacing:.02em}
+.agpaper h3{color:#0796f0;font-size:14.5px;margin:16px 0 6px;font-weight:800}
+.agpaper p{margin:0 0 8px;color:#22222e;font-size:13.5px}
+.agpaper p b{color:#141130}
+.agpaper .agsub{font-style:italic;color:#0796f0}
+.agpaper .agref{font-size:11.5px;color:#5b5a70}
+.agpaper ul{margin:0 0 8px;padding-left:18px}
+.agpaper li{margin-bottom:4px}
+.agpaper li b{color:#141130}
+.agpaper table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:6px}
+.agpaper td{border-bottom:1px solid #e2e5f0;padding:6px 8px;vertical-align:top;color:#22222e}
+.agpaper td:first-child{color:#5b5a70;width:42%;font-weight:600}
+.agsigs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:6px}
+.agsigs div{border-top:3px solid #141130;padding-top:8px;display:grid;gap:4px;align-content:start}
+.agsigs span{font-weight:800;color:#141130}
+.agsigs img{width:100%;max-width:280px;height:auto}
+.agsigs small{color:#5b5a70}
+.agproof{font-size:11px!important;color:#5b5a70!important;word-break:break-all;border-top:1px solid #e2e5f0;padding-top:10px;margin-top:14px!important}
+@page{margin:14mm}
+@media print{:root,html{color-scheme:light!important}html,body.agp{background:#fff!important;background-image:none!important}body.agp::before,body.agp::after{display:none!important}body.agp>*:not(#agcopy){display:none!important}#agcopy{position:static;background:#fff;padding:0;overflow:visible}.agbar{display:none!important}.agpaper{max-width:none;border-radius:0;padding:0;font-size:12px}}
 </style>
 </head>
 <body>
@@ -1892,7 +1945,7 @@ async function coordination() {
 /* ---------- Accès protégé : invitation par e-mail et adresse confirmée (Firebase) ---------- */
 const FIREBASE = {"apiKey":"AIzaSyCevx1UJvm_sb3hPaonZUr4LwDnoW05kzc","authDomain":"bongo-pilote.firebaseapp.com","projectId":"bongo-pilote","storageBucket":"bongo-pilote.firebasestorage.app","messagingSenderId":"363417634461","appId":"1:363417634461:web:31cea51b2378cee89b7674"};
 const FB_ON = HOSTED && !!(FIREBASE && FIREBASE.apiKey);
-const FBK_URL = "fbkit-12.19.0.js";
+const FBK_URL = "fbkit-12.19.0b.js";
 const MAIL_OK = /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i;
 const GLOGO = `<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
 let fbP = null, FBA = null, ACC = null, fbPoll = null;
@@ -1952,10 +2005,11 @@ async function secureEnter(ctx, after) {
   if (ctx === "coord") return acc.admin ? after(acc) : deniedView(ctx, after);
   if (!acc.inv && !acc.admin) return deniedView(ctx, after);
   if (acc.inv) { const prev = INVITE || {}; INVITE = { id: String(acc.inv.code || prev.id || ""), n: String(acc.inv.name || prev.n || "").split(" ")[0].slice(0, 40), r: prev.r || "", e: acc.email }; storeInvite(INVITE); }
+  if (acc.inv) return agreementGate(acc, () => after(acc), () => fbFail(ctx, after));
   after(acc);
 }
 function toPilot() { try { history.replaceState(null, "", location.pathname); } catch (e) {} secureEnter("tester", enterApp); }
-async function fbSignOut() { clearInterval(fbPoll); try { await FBA.K.signOut(FBA.auth); } catch (e) {} ACC = null; OWNER = null; INVITE = null; try { localStorage.removeItem("bongo-invite"); } catch (e) {} }
+async function fbSignOut() { clearInterval(fbPoll); try { await FBA.K.signOut(FBA.auth); } catch (e) {} ACC = null; OWNER = null; INVITE = null; MYAGR = null; try { localStorage.removeItem("bongo-invite"); } catch (e) {} }
 function signInView(ctx, after) {
   const c = ctx === "coord", n = !c && INVITE && INVITE.n ? INVITE.n : "", em = (!c && INVITE && INVITE.e) || "";
   authShell(`<p class="eyebrow">${c ? "Espace coordinateur · accès protégé" : "Pilote privé · accès protégé"}</p>
@@ -2034,13 +2088,13 @@ function fbFail(ctx, after) {
   $("#fretry").onclick = () => secureEnter(ctx, after);
 }
 function enterApp() { const sv = load(); if (INVITE && INVITE.id && !(sv && sv.pact && sv.id === INVITE.id)) welcomeInvite(!!(sv && sv.pact)); else whoWatches(); }
-function fbWhoLine() { const m = FB_ON ? fbMail() : ""; return m ? `<p class="small">Connecté avec ${esc(m)} · <button class="linkb" id="fbout" type="button">Changer de compte</button></p>` : ""; }
-function fbWireOut() { const b = $("#fbout"); if (b) b.onclick = async () => { await fbSignOut(); toPilot(); }; }
+function fbWhoLine() { const m = FB_ON ? fbMail() : ""; return m ? `<p class="small">Connecté avec ${esc(m)} · ${MYAGR ? `<button class="linkb" id="fbagr" type="button">Mon engagement</button> · ` : ""}<button class="linkb" id="fbout" type="button">Changer de compte</button></p>` : ""; }
+function fbWireOut() { const b = $("#fbout"); if (b) b.onclick = async () => { await fbSignOut(); toPilot(); }; const a = $("#fbagr"); if (a) a.onclick = () => agrCopy(MYAGR); }
 
 /* --- Résultats envoyés automatiquement --- */
 async function fbSaveResult(code) {
   if (!FB_ON || !FBA || !FBA.auth.currentUser || !ACC || !ACC.inv) throw new Error("hors ligne");
-  await FBA.K.setDoc(FBA.K.doc(FBA.db, "results", fbMail()), { code, id: String(S.id || ""), name: String(S.nm || ""), at: Date.now() });
+  await FBA.K.setDoc(FBA.K.doc(FBA.db, "results", fbMail()), { code, id: String(S.id || ""), name: String(S.nm || ""), at: Date.now() }, { merge: true });
 }
 
 /* --- Espace coordinateur relié à Firestore --- */
@@ -2063,15 +2117,196 @@ function fbCoordConnect() {
   const pull = async () => {
     try {
       const s = await FBA.K.getDocs(FBA.K.collection(FBA.db, "results"));
-      s.docs.forEach((d) => { const x = d.data(); try { const o = JSON.parse(b64d(String(x.code || "").replace(/^BONGO2\./, ""))); if (o && o.v === 2) { o.em = d.id; coordRows.set(keyOf(o), o); } } catch (e) {} });
+      try { const sa = await FBA.K.getDocs(FBA.K.collection(FBA.db, "agreements")); sa.docs.forEach((d) => AGRS.set(d.id, d.data())); } catch (e) {}
+      s.docs.forEach((d) => { const x = d.data(); if (x && x.agreement && !AGRS.has(d.id)) AGRS.set(d.id, x.agreement); try { const o = JSON.parse(b64d(String(x.code || "").replace(/^BONGO2\./, ""))); if (o && o.v === 2) { o.em = d.id; coordRows.set(keyOf(o), o); } } catch (e) {} });
       if (!$("#cview")) return;
       try { localStorage.setItem("bongo-coord-v2", JSON.stringify(Array.from(coordRows.values()))); } catch (e) {}
       coordRender();
-      const n = s.size, h = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+      const n = s.docs.filter((d) => d.data() && d.data().code).length, h = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
       $("#cst").textContent = `Résultats en ligne : ${n} testeur${n > 1 ? "s ont" : " a"} terminé. Mis à jour à ${h}, puis toutes les 30 secondes.`;
     } catch (e) { const c = $("#cst"); if (c) c.textContent = "Impossible de lire les résultats en ligne pour l'instant. Réessaie dans un instant."; }
   };
   pull(); clearInterval(fbPoll); fbPoll = setInterval(() => { if (!$("#cview")) { clearInterval(fbPoll); return; } if (!document.hidden) pull(); }, 30000);
+}
+
+
+/* ---------- Engagement de confidentialité, signé en ligne avec le doigt ---------- */
+const AGREEMENT = {"ref":"BONGO/PANEL/EC/2026-01","version":"version 2 du 24 octobre 2026","title":"Engagement de confidentialité","subtitle":"Panel des testeurs et ambassadeurs de BONGO, l'Académie de l'esprit critique","essentials":[["Je ne montre rien.","Aucune capture d'écran, aucun enregistrement, aucune photo de l'écran, aucune publication."],["Je ne raconte rien.","Je ne révèle ni les pièges, ni les histoires, ni leurs solutions : un piège révélé est un piège désamorcé."],["Mon lien est à moi seul.","Mon invitation, mon adresse et mon code testeur ne se prêtent ni ne se partagent."],["Mon avis est libre et franc.","BONGO peut s'en servir pour améliorer la série, sans contrepartie et sans me citer."],["Mes données servent au test, et à lui seul.","Je peux retirer mon consentement à tout moment."]],"essentialsNote":"Ce résumé facilite la lecture et n'a pas de valeur contractuelle : seuls les articles font foi.","parties":["BONGO, l'Académie de l'esprit critique, projet porté par Monsieur Pierre-David FIDAMI, son fondateur, agissant tant en cette qualité que pour le compte de la structure juridique qui portera BONGO et qui reprendra de plein droit le bénéfice du présent engagement, ci-après dénommé « BONGO », d'une part,","Et la personne identifiée dans le présent engagement, ci-après dénommée « le Participant », d'autre part."],"preamble":["BONGO développe une série interactive d'éducation à l'esprit critique, destinée en priorité à la jeunesse congolaise. Avant son lancement public, BONGO confie ses épisodes à un panel restreint de testeurs et d'ambassadeurs, choisis pour leur regard, afin d'en mesurer l'effet et d'en corriger les défauts.","La valeur pédagogique de BONGO repose en grande partie sur la surprise : chaque épisode tend un piège réel, que le spectateur doit vivre sans l'avoir anticipé. Une seule divulgation peut fausser les résultats du test et priver d'autres participants de leur réaction authentique. C'est pourquoi l'accès au panel est subordonné à la signature du présent engagement."],"articles":[["Article 1 · Objet",["Le présent engagement fixe les conditions dans lesquelles le Participant accède aux contenus non publiés de BONGO et les obligations de confidentialité qu'il s'engage à respecter, pendant et après sa participation au panel."]],["Article 2 · Informations confidentielles",["Sont confidentielles toutes les informations, quels qu'en soient la forme et le support, que le Participant reçoit ou découvre à l'occasion de sa participation, qu'elles portent ou non la mention « confidentiel », et notamment : les épisodes, scénarios, dialogues, personnages et décors ; les pièges, leurs mécanismes et leurs solutions ; les questions, tests, verdicts et résultats ; les voix, musiques, images, écrans et éléments de design ; les fonctionnalités de l'application ; les liens d'accès, identifiants et codes testeurs ; le calendrier de lancement, les prix envisagés, les partenaires et, plus généralement, toute information relative au projet BONGO qui n'a pas été rendue publique par BONGO lui-même."]],["Article 3 · Exceptions",["Ne sont pas couvertes par le présent engagement les informations dont le Participant établit qu'elles étaient déjà publiques au moment où il en a eu connaissance, ou le sont devenues sans faute de sa part, notamment par une publication de BONGO, ainsi que celles dont la divulgation est exigée par la loi ou par une décision de justice ; dans ce dernier cas, le Participant en avertit BONGO sans délai, dans la mesure où la loi le permet, et limite la divulgation à ce qui est strictement exigé."]],["Article 4 · Obligations du Participant",[["4.1 · Usage limité.","Le Participant n'utilise les informations confidentielles que pour les besoins du test auquel il est invité."],["4.2 · Silence.","Il s'interdit de les communiquer, directement ou indirectement, à quelque personne que ce soit, y compris à ses proches, à ses camarades et aux membres de ses groupes de discussion, et de raconter, résumer ou laisser deviner les histoires et les pièges des épisodes."],["4.3 · Aucune reproduction.","Il s'interdit toute capture d'écran, tout enregistrement de l'écran ou du son, toute photographie ou vidéo de l'écran, toute copie de texte ou de fichier, ainsi que toute publication, même partielle ou anonyme, sur un réseau social, un statut, une story, un forum, un groupe de discussion ou tout autre support."],["4.4 · Accès personnel.","Le lien d'invitation, l'adresse e-mail associée, le mot de passe et le code testeur sont strictement personnels. Le Participant ne les communique à personne, ne laisse personne utiliser son accès et visionne les épisodes à l'abri des regards et des appareils d'autrui. Il informe BONGO sans délai de toute perte, de tout usage suspect et de toute fuite dont il aurait connaissance."],["4.5 · Intégrité.","Il s'interdit de tenter d'extraire, de télécharger, de décompiler ou de reproduire tout ou partie de l'application, de ses fichiers ou de ses contenus."],["4.6 · Restitution.","À la fin de sa participation ou à la première demande de BONGO, il supprime les messages, liens et documents relatifs au test qu'il aurait conservés."]]],["Article 5 · Avis et contributions",["Le Participant s'engage à donner un avis sincère. Il autorise BONGO à utiliser librement, à titre gratuit, sans limitation de durée ni de territoire, ses réponses, résultats, commentaires et suggestions, pour améliorer, développer et présenter BONGO. Ces contributions ne lui confèrent aucun droit sur BONGO ni sur ses contenus. Les résultats sont exploités sous forme anonyme ; le nom du Participant n'est jamais cité sans son accord écrit."]],["Article 6 · Propriété intellectuelle",["BONGO, son nom, son logo, ses personnages, ses épisodes, ses textes, ses images, ses voix et l'ensemble de ses contenus demeurent la propriété exclusive de BONGO ou de ses ayants droit, et sont protégés par la législation congolaise relative au droit d'auteur, aux droits voisins et à la propriété industrielle, ainsi que par les conventions internationales applicables. Le présent engagement ne confère au Participant qu'un droit de visionnage personnel, limité au test, révocable et non cessible."]],["Article 7 · Données personnelles",["Pour organiser le test, BONGO traite les données suivantes : identité, date de naissance, commune, adresse e-mail, téléphone, code testeur, signature, réponses, résultats et avis. Ces données servent exclusivement à donner accès aux épisodes, à établir la preuve du présent engagement, à analyser les résultats du panel et à recontacter le Participant pour les tests suivants. Elles sont hébergées sur les services Google Firebase, avec un accès réservé au coordinateur du pilote, ne sont ni vendues ni cédées, et sont supprimées ou rendues anonymes au plus tard douze mois après la fin du programme de test, l'engagement signé étant toutefois conservé pendant la durée prévue à l'article 8.","Conformément à l'ordonnance-loi n° 23/010 du 13 mars 2023 portant Code du numérique, le Participant donne, par sa signature, son consentement préalable et explicite à ce traitement. Il peut à tout moment retirer ce consentement, accéder à ses données, les faire rectifier ou effacer, en écrivant au coordinateur du pilote à l'adresse davidfidami@gmail.com. Le retrait du consentement met fin à la participation au panel, sans délier le Participant de ses obligations de confidentialité."]],["Article 8 · Durée",["Le présent engagement prend effet à sa signature. Les obligations de confidentialité s'appliquent pendant toute la durée de la participation et pendant les trois ans qui suivent la fin de celle-ci, quelle qu'en soit la cause, à l'exception des informations que BONGO aura lui-même rendues publiques."]],["Article 9 · Participation libre et bénévole",["La participation au panel est volontaire et bénévole ; elle ne donne lieu à aucune rémunération. Le Participant peut y mettre fin à tout moment en prévenant le coordinateur ; BONGO peut, de même, mettre fin à toute participation. Les missions de communication confiées aux ambassadeurs à compter du lancement public feront l'objet d'instructions écrites de BONGO : jusqu'à ce lancement, aucun ambassadeur n'est autorisé à communiquer sur BONGO, ses contenus ou son calendrier."]],["Article 10 · Manquement",["Tout manquement au présent engagement entraîne la fin immédiate de la participation et la désactivation de l'accès du Participant. BONGO peut en outre exiger le retrait de tout contenu divulgué et se réserve le droit de demander réparation du préjudice subi, conformément au droit commun des obligations."]],["Article 11 · Participant mineur",["Le panel est ouvert à partir de seize ans. Si le Participant a moins de dix-huit ans, le présent engagement est également signé par son père, sa mère ou son représentant légal, qui consent à sa participation et au traitement de ses données dans les conditions de l'article 7, et veille au respect de ses obligations."]],["Article 12 · Droit applicable et litiges",["Le présent engagement est régi par le droit de la République démocratique du Congo. Les parties s'efforcent de régler à l'amiable tout différend relatif à son interprétation ou à son exécution, dans un délai de trente jours à compter de sa notification par écrit. À défaut d'accord, le différend est porté devant les juridictions compétentes de Kinshasa."]],["Article 13 · Signature et preuve",["Le présent engagement exprime l'intégralité de l'accord des parties sur son objet. Il est signé en ligne, à l'ouverture du lien personnel d'invitation, ou, à défaut, sur papier.","Signé en ligne, il est accepté par le Participant au moyen de cases à cocher et d'une signature tracée sur l'écran. Cette acceptation est rattachée à l'adresse e-mail confirmée du Participant et à son code testeur, horodatée par le serveur et scellée par une empreinte numérique du texte et des données saisies ; elle ne peut plus être modifiée une fois enregistrée. Les parties conviennent qu'elle vaut signature, au sens des dispositions du Code du numérique relatives à l'écrit et à la signature électroniques, et qu'elle fait foi entre elles. Le Participant peut à tout moment consulter et enregistrer une copie de l'engagement signé.","Signé sur papier, il est établi en deux exemplaires ; la copie numérisée ou photographiée transmise par e-mail ou par messagerie fait foi entre les parties au même titre que l'original."]]]};
+const AGR_VER = AGREEMENT.ref + " · " + AGREEMENT.version;
+const AGRS = new Map(); /* coordinateur : adresse -> engagement signé */
+let MYAGR = null, AGR_HASH = null;
+async function sha256(s) { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join(""); }
+async function agrTextHash() { if (!AGR_HASH) AGR_HASH = await sha256(JSON.stringify(AGREEMENT)); return AGR_HASH; }
+const agrP = (p) => Array.isArray(p) ? `<p><b>${esc(p[0])}</b> ${esc(p[1])}</p>` : `<p>${esc(p)}</p>`;
+function agrEssHTML() { return `<ul>${AGREEMENT.essentials.map(([a, b]) => `<li><b>${esc(a)}</b> ${esc(b)}</li>`).join("")}</ul>`; }
+function agrTextHTML() {
+  const A = AGREEMENT;
+  return `<h3>Entre les soussignés</h3>${A.parties.map(agrP).join("")}<h3>Préambule</h3>${A.preamble.map(agrP).join("")}` + A.articles.map(([t, ps]) => `<h3>${esc(t)}</h3>${ps.map(agrP).join("")}`).join("");
+}
+function agrDate(rec) {
+  let d = null;
+  try { if (rec.signedAt && typeof rec.signedAt.toDate === "function") d = rec.signedAt.toDate(); } catch (e) {}
+  if (!d && rec.signedAtMs) d = new Date(rec.signedAtMs);
+  if (!d && rec.clientAt) d = new Date(rec.clientAt);
+  return d;
+}
+function agrWhen(rec) { const d = agrDate(rec); return d ? `${d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} à ${d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}` : "date inconnue"; }
+function ageOf(iso) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || "")); if (!m) return null;
+  const y = +m[1], mo = +m[2], d = +m[3], now = new Date(); if (y < 1900) return null;
+  let a = now.getFullYear() - y; if (now.getMonth() + 1 < mo || (now.getMonth() + 1 === mo && now.getDate() < d)) a--;
+  return a;
+}
+
+/* --- Lecture et enregistrement (collection « agreements », repli sur « results » si les règles ne l'ouvrent pas encore) --- */
+async function agrFetch(email) {
+  const { K, db } = FBA;
+  try { const d = await K.getDoc(K.doc(db, "agreements", email)); if (d.exists()) return Object.assign({}, d.data(), { src: "agreements" }); }
+  catch (e) { if (!isDenied(e)) throw e; }
+  try { const r = await K.getDoc(K.doc(db, "results", email)); const x = r.exists() ? r.data() : null; if (x && x.agreement) return Object.assign({}, x.agreement, { src: "results" }); }
+  catch (e) { if (!isDenied(e)) throw e; }
+  return null;
+}
+async function agrSave(rec) {
+  const { K, db } = FBA, em = fbMail(), data = Object.assign({}, rec, { signedAt: K.serverTimestamp() });
+  try { await K.setDoc(K.doc(db, "agreements", em), data); return "agreements"; }
+  catch (e) { if (!isDenied(e)) throw e; }
+  await K.setDoc(K.doc(db, "results", em), { agreement: data }, { merge: true });
+  return "results";
+}
+async function agreementGate(acc, next, fail) {
+  if (!FB_ON || !acc || !acc.inv) return next();
+  fbWait();
+  let rec = null;
+  try { rec = await agrFetch(acc.email); } catch (e) { return fail(); }
+  if (rec) { MYAGR = rec; return next(); }
+  agreementView(acc, next);
+}
+
+/* --- Pavé de signature au doigt --- */
+function sigPad(cv, onChange) {
+  const ctx = cv.getContext("2d"); let dpr = 2, pts = 0, len = 0, drawing = false, last = null;
+  function resize() { const r = cv.getBoundingClientRect(); if (!r.width) return; dpr = Math.max(1.5, Math.min(2.5, window.devicePixelRatio || 2)); cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#141130"; ctx.fillStyle = "#141130"; ctx.lineWidth = 2.8; pts = 0; len = 0; cv.parentNode.classList.remove("inked"); }
+  resize();
+  const pos = (e) => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  const seg = (p) => { ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); len += Math.hypot(p.x - last.x, p.y - last.y); last = p; pts++; };
+  cv.addEventListener("pointerdown", (e) => { e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (x) {} drawing = true; last = pos(e); ctx.beginPath(); ctx.arc(last.x, last.y, 1.3, 0, Math.PI * 2); ctx.fill(); pts++; cv.parentNode.classList.add("inked"); });
+  cv.addEventListener("pointermove", (e) => { if (!drawing) return; e.preventDefault(); const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e]; (evs.length ? evs : [e]).forEach((x) => seg(pos(x))); });
+  const up = () => { if (!drawing) return; drawing = false; onChange(); };
+  ["pointerup", "pointercancel", "pointerleave"].forEach((t) => cv.addEventListener(t, up));
+  return { resize, clear() { ctx.clearRect(0, 0, cv.width, cv.height); pts = 0; len = 0; cv.parentNode.classList.remove("inked"); onChange(); }, ok: () => len > 70 && pts > 14, png: () => cv.toDataURL("image/png") };
+}
+const padHTML = (id, ph) => `<div class="sigpad"><canvas id="${id}" aria-label="${esc(ph)}"></canvas><span class="sigph">${esc(ph)}</span><button class="linkb sigclr" data-clr="${id}" type="button">Effacer</button></div>`;
+
+/* --- L'écran de l'engagement --- */
+function agreementView(acc, next) {
+  mode("gate"); setBackdrop(""); hush();
+  const inv = acc.inv || {}, em = acc.email, code = String(inv.code || (INVITE && INVITE.id) || ""), today = new Date().toISOString().slice(0, 10);
+  render(`<section class="pacte auth agree">
+  <img src="${LOGO}" alt="BONGO" class="alogo">
+  <p class="eyebrow">Avant d'entrer · Engagement de confidentialité</p>
+  <h1>BONGO est encore un secret. Signe pour le garder.</h1>
+  <p>Lis l'engagement jusqu'au bout, complète tes informations, puis signe avec ton doigt. Sans signature, pas d'accès à l'épisode.</p>
+  <div class="agess"><b>L'essentiel en cinq points</b>${agrEssHTML()}<p class="small">${esc(AGREEMENT.essentialsNote)}</p></div>
+  <p class="lbl" style="margin:4px 0 -8px">L'engagement complet · ${esc(AGR_VER)}</p>
+  <div class="agtext" id="agtext" tabindex="0">${agrTextHTML()}<p class="agend">Fin de l'engagement.</p></div>
+  <p class="small" id="aghint">Fais défiler le texte jusqu'en bas pour pouvoir le signer.</p>
+  <p class="lbl" style="margin:6px 0 -8px">Tes informations</p>
+  <label class="f" for="agName">Nom, postnom et prénom<input type="text" id="agName" autocomplete="name" value="${esc(String(inv.name || ""))}" placeholder="Ex. Mbuyi Kabeya Junior"></label>
+  <label class="f" for="agBirth">Date de naissance<input type="date" id="agBirth" max="${today}" min="1920-01-01"></label>
+  <label class="f" for="agCom">Commune et quartier<input type="text" id="agCom" placeholder="Ex. Lemba, Righini"></label>
+  <label class="f" for="agTel">Téléphone (WhatsApp)<input type="tel" id="agTel" inputmode="tel" autocomplete="tel" placeholder="+243 …" value="${esc(inv.phone ? "+" + String(inv.phone).replace(/^\+/, "") : "")}"></label>
+  <div class="f"><span>Qualité</span><div class="agrole"><label><input type="radio" name="agRole" value="testeur"> Testeur</label><label><input type="radio" name="agRole" value="ambassadeur"> Ambassadeur</label></div></div>
+  <div class="agid"><span>Adresse confirmée</span><b>${esc(em)}</b><span>Code testeur</span><b>${esc(code || "attribué par BONGO")}</b></div>
+  <div id="agMinor" class="agminor" hidden>
+    <p class="lbl" style="margin:0">Participant de moins de dix-huit ans</p>
+    <p class="small">Ton père, ta mère ou ton représentant légal complète cette partie et signe à côté de toi, sur ce même écran.</p>
+    <label class="f" for="agPName">Nom du parent ou du représentant légal<input type="text" id="agPName"></label>
+    <label class="f" for="agPLink">Lien avec le participant<input type="text" id="agPLink" placeholder="Mère, père, tuteur…"></label>
+    <label class="f" for="agPTel">Téléphone du parent<input type="tel" id="agPTel" inputmode="tel" placeholder="+243 …"></label>
+    <div class="f"><span>Signature du parent ou du représentant légal</span>${padHTML("agPPad", "Le parent signe ici avec son doigt")}</div>
+  </div>
+  <label class="check" for="agRead"><input type="checkbox" id="agRead" disabled><span>J'ai lu l'engagement en entier et je l'accepte.</span></label>
+  <label class="check" for="agData"><input type="checkbox" id="agData"><span>J'accepte que mes données soient traitées pour le test, dans les conditions de l'article 7.</span></label>
+  <div class="f"><span>Ta signature</span>${padHTML("agPad", "Signe ici avec ton doigt")}</div>
+  <button class="btn gold wide" id="agGo" type="button" disabled>Je signe l'engagement</button>
+  <p class="small astat" id="agSt" role="status" aria-live="polite"></p>
+  <p class="small">Ta signature est horodatée, rattachée à ton adresse confirmée et scellée par une empreinte numérique. Tu pourras en garder une copie.</p>
+  ${fbWhoLine()}</section>`);
+  fbWireOut();
+  let read = false, touched = false, pSized = false;
+  const v = (id) => ($("#" + id) ? $("#" + id).value.trim() : "");
+  const pad = sigPad($("#agPad"), () => check()), ppad = sigPad($("#agPPad"), () => check());
+  $$("[data-clr]").forEach((b) => (b.onclick = () => (b.dataset.clr === "agPad" ? pad : ppad).clear()));
+  const tx = $("#agtext");
+  const seen = () => { if (read) return; if (tx.scrollTop + tx.clientHeight >= tx.scrollHeight - 30) { read = true; $("#agRead").disabled = false; $("#aghint").textContent = "Texte lu jusqu'au bout : tu peux cocher la première case."; check(); } };
+  tx.addEventListener("scroll", seen, { passive: true }); setTimeout(seen, 300);
+  function check() {
+    const name = v("agName"), age = ageOf(v("agBirth")), com = v("agCom"), tel = v("agTel").replace(/\D/g, ""), roleEl = document.querySelector('input[name="agRole"]:checked');
+    const minor = age !== null && age >= 16 && age < 18;
+    $("#agMinor").hidden = !minor; if (minor && !pSized) { ppad.resize(); pSized = true; }
+    let msg = "";
+    if (name.length < 5 || name.split(/\s+/).length < 2) msg = "Indique ton nom complet : nom, postnom et prénom.";
+    else if (age === null) msg = "Indique ta date de naissance.";
+    else if (age < 16) msg = "Le panel est ouvert à partir de seize ans.";
+    else if (age > 100) msg = "Vérifie ta date de naissance.";
+    else if (com.length < 2) msg = "Indique ta commune et ton quartier.";
+    else if (tel.length < 9) msg = "Indique ton numéro de téléphone.";
+    else if (!roleEl) msg = "Choisis ta qualité : testeur ou ambassadeur.";
+    else if (minor && (v("agPName").length < 5 || v("agPLink").length < 2 || v("agPTel").replace(/\D/g, "").length < 9)) msg = "Complète les informations du parent ou du représentant légal.";
+    else if (!read) msg = "Fais défiler l'engagement jusqu'en bas.";
+    else if (!$("#agRead").checked) msg = "Coche la case « J'ai lu l'engagement en entier et je l'accepte ».";
+    else if (!$("#agData").checked) msg = "Coche la case relative à tes données.";
+    else if (!pad.ok()) msg = "Signe dans le cadre blanc avec ton doigt.";
+    else if (minor && !ppad.ok()) msg = "Le parent ou le représentant légal doit signer dans son cadre.";
+    $("#agGo").disabled = !!msg; $("#agSt").textContent = touched ? msg : "";
+    return !msg;
+  }
+  $$("#view input").forEach((el) => { el.addEventListener("input", () => { touched = true; check(); }); el.addEventListener("change", () => { touched = true; check(); }); });
+  $("#agGo").onclick = async () => {
+    touched = true; if (!check()) return;
+    const b = $("#agGo"); b.disabled = true; $("#agSt").textContent = "Enregistrement de ta signature…";
+    const age = ageOf(v("agBirth")), minor = age < 18;
+    const rec = {
+      v: AGR_VER, textHash: await agrTextHash(), email: em, code, name: v("agName").replace(/\s+/g, " ").slice(0, 120), birth: v("agBirth"), commune: v("agCom").slice(0, 120),
+      phone: v("agTel").slice(0, 30), role: document.querySelector('input[name="agRole"]:checked').value, minor,
+      parent: minor ? { name: v("agPName").slice(0, 120), link: v("agPLink").slice(0, 60), phone: v("agPTel").slice(0, 30), sig: ppad.png() } : null,
+      read: true, consent: true, sig: pad.png(), ua: String(navigator.userAgent || "").slice(0, 200), tz: (Intl.DateTimeFormat().resolvedOptions().timeZone || ""), clientAt: Date.now()
+    };
+    rec.hash = await sha256(JSON.stringify(rec));
+    try { rec.src = await agrSave(rec); }
+    catch (e) { b.disabled = false; $("#agSt").textContent = fbErr(e) === "unavailable" || /network/i.test(String(e && e.message)) ? "Connexion internet impossible : vérifie ton réseau, puis appuie de nouveau sur « Je signe »." : "L'enregistrement a échoué. Réessaie dans un instant."; return; }
+    rec.signedAtMs = Date.now(); MYAGR = rec; sfx("good"); agreementDone(rec, next);
+  };
+  check();
+}
+function agreementDone(rec, next) {
+  const first = (INVITE && INVITE.n) || String(rec.name || "").trim().split(" ").pop();
+  render(`<section class="pacte auth agree"><img src="${LOGO}" alt="BONGO" class="alogo"><p class="eyebrow">Engagement signé</p>
+  <h1>Merci${first ? ", " + esc(first) : ""}. Ton engagement est enregistré.</h1>
+  <p>Signé électroniquement le ${esc(agrWhen(rec))}, avec l'adresse <b class="amail">${esc(rec.email)}</b>. Le secret commence maintenant.</p>
+  <button class="btn gold wide" id="agNext" type="button">Entrer dans BONGO</button><button class="btn ghost wide" id="agCopy" type="button">Voir et enregistrer ma copie</button></section>`);
+  $("#agNext").onclick = () => next(); $("#agCopy").onclick = () => agrCopy(rec);
+}
+
+/* --- Copie de l'engagement signé, imprimable en PDF --- */
+function agrCopy(rec) {
+  if (!rec) return;
+  const old = $("#agcopy"); if (old) old.remove();
+  const A = AGREEMENT, row = (a, b) => `<tr><td>${esc(a)}</td><td>${esc(b || "")}</td></tr>`;
+  const bd = /^(\d{4})-(\d{2})-(\d{2})$/.exec(rec.birth || ""), birth = bd ? `${bd[3]}/${bd[2]}/${bd[1]}` : rec.birth;
+  const el = document.createElement("div"); el.id = "agcopy"; el.className = "agcopy";
+  el.innerHTML = `<div class="agbar"><button class="btn gold" id="agPrint" type="button">Enregistrer en PDF</button><button class="btn ghost" id="agClose" type="button">Fermer</button></div>
+  <article class="agpaper"><img src="${LOGO}" alt="BONGO" class="aglogo"><h2>${esc(A.title.toUpperCase())}</h2><p class="agsub">${esc(A.subtitle)}</p><p class="agref">Réf. ${esc(A.ref)} · ${esc(A.version)}</p>
+  <h3>Le Participant</h3><table>${row("Nom, postnom et prénom", rec.name)}${row("Date de naissance", birth)}${row("Commune et quartier", rec.commune)}${row("Téléphone", rec.phone)}${row("Adresse e-mail confirmée", rec.email)}${row("Qualité", rec.role === "ambassadeur" ? "Ambassadeur" : "Testeur")}${row("Code testeur", rec.code)}</table>
+  ${rec.parent ? `<h3>Représentant légal</h3><table>${row("Nom", rec.parent.name)}${row("Lien avec le Participant", rec.parent.link)}${row("Téléphone", rec.parent.phone)}</table>` : ""}
+  <h3>L'essentiel en cinq points</h3>${agrEssHTML()}<p class="agref">${esc(A.essentialsNote)}</p>
+  ${agrTextHTML()}
+  <h3>Signatures</h3><div class="agsigs"><div><span>Le Participant</span><img src="${esc(rec.sig)}" alt="Signature du Participant"><small>${esc(rec.name)} · « Lu et approuvé »</small></div>${rec.parent ? `<div><span>Le représentant légal</span><img src="${esc(rec.parent.sig)}" alt="Signature du représentant légal"><small>${esc(rec.parent.name)} (${esc(rec.parent.link)}) · « Lu et approuvé, bon pour accord »</small></div>` : ""}<div><span>Pour BONGO</span><b>Pierre-David FIDAMI</b><small>Fondateur</small></div></div>
+  <p class="agproof">Signé électroniquement le ${esc(agrWhen(rec))} (heure de ${esc(rec.tz || "l'appareil")}), depuis l'adresse confirmée ${esc(rec.email)}, code testeur ${esc(rec.code || "")}. Cases cochées : lecture intégrale et acceptation ; consentement au traitement des données. Empreinte SHA-256 du texte : ${esc(rec.textHash || "")}. Empreinte SHA-256 de l'acte : ${esc(rec.hash || "")}.</p></article>`;
+  document.body.appendChild(el); document.body.classList.add("agp");
+  const close = () => { el.remove(); document.body.classList.remove("agp"); };
+  $("#agClose").onclick = close; $("#agPrint").onclick = () => { try { window.print(); } catch (e) {} };
 }
 
 
@@ -2201,13 +2436,13 @@ function invMail(inv) {
   const subject = "Invitation · Pilote BONGO, épisode 1 « Trois secondes »";
   const intro = [`Bonjour${first ? " " + first : ""},`, "", "Tu es invité(e) à tester en avant-première l'épisode 1 de BONGO, l'Académie de l'esprit critique. Compte environ 25 minutes, avec des écouteurs si possible.", ""];
   const steps = FB_ON
-    ? [`1. Ouvre ton lien personnel, sur ton téléphone ou ton ordinateur : ${link}`, `2. Confirme que l'invitation est bien la tienne : choisis « Continuer avec Google », ou reçois un e-mail de confirmation à ${inv.email}. Seule cette adresse ouvre l'accès au pilote.`, "3. À la fin de l'épisode, tes résultats sont envoyés automatiquement au coordinateur. Tu n'as rien d'autre à faire."]
+    ? [`1. Ouvre ton lien personnel, sur ton téléphone ou ton ordinateur : ${link}`, `2. Confirme que l'invitation est bien la tienne : choisis « Continuer avec Google », ou reçois un e-mail de confirmation à ${inv.email}. Seule cette adresse ouvre l'accès au pilote.`, "3. Avant l'épisode, lis l'engagement de confidentialité et signe-le directement sur l'écran, avec ton doigt. Sans signature, pas d'accès.", "4. À la fin de l'épisode, tes résultats sont envoyés automatiquement au coordinateur. Tu n'as rien d'autre à faire."]
     : PUBLIC_MODE()
     ? [`1. Ouvre ton lien personnel, sur ton téléphone ou ton ordinateur : ${link}`, `2. Ton code testeur est déjà rempli. Si on te demande ton code d'invitation, saisis : ${inviteCode(inv.code)}`, "3. À la fin de l'épisode, renvoie ton code de résultats en réponse à cet e-mail, ou sur WhatsApp."]
     : [`1. Ouvre ce lien : ${ARTIFACT_URL}`, `2. Connecte-toi à Claude avec cette adresse e-mail : ${inv.email}. Si tu n'as pas encore de compte Claude, crée-le gratuitement avec cette même adresse, sinon le lien ne s'ouvrira pas.`, `3. Choisis « Nouveau testeur » et saisis ton code testeur : ${inv.code}`, "4. À la fin de l'épisode, copie ton code de résultats et renvoie-le en réponse à cet e-mail, ou sur WhatsApp."];
   const body = [...intro, ...steps, "", "Les personnes, entreprises et comptes de l'épisode sont fictifs. Rien ne te sera demandé : ni argent, ni donnée personnelle.", "", "Merci pour ton aide,", sig].join("\n");
   const waText = FB_ON
-    ? [`Bonjour${first ? " " + first : ""} ! Tu es invité(e) à tester l'épisode 1 de BONGO, l'Académie de l'esprit critique (25 min, écouteurs conseillés).`, "", `Ton lien personnel : ${link}`, `Pour entrer, confirme ton adresse ${inv.email}, avec le bouton Google ou par l'e-mail de confirmation : seule cette adresse ouvre l'accès.`, "", "À la fin, tes résultats me parviennent automatiquement.", sig].join("\n")
+    ? [`Bonjour${first ? " " + first : ""} ! Tu es invité(e) à tester l'épisode 1 de BONGO, l'Académie de l'esprit critique (25 min, écouteurs conseillés).`, "", `Ton lien personnel : ${link}`, `Pour entrer, confirme ton adresse ${inv.email}, avec le bouton Google ou par l'e-mail de confirmation : seule cette adresse ouvre l'accès.`, "Avant l'épisode, tu signeras l'engagement de confidentialité sur l'écran, avec ton doigt.", "", "À la fin, tes résultats me parviennent automatiquement.", sig].join("\n")
     : [`Bonjour${first ? " " + first : ""} ! Tu es invité(e) à tester l'épisode 1 de BONGO, l'Académie de l'esprit critique (25 min, écouteurs conseillés).`, "", `Ton lien personnel : ${link}`, `Ton code d'invitation : ${inviteCode(inv.code)}`, "", "À la fin, renvoie-moi ton code de résultats ici.", sig].join("\n");
   return { subject, body, href: inv.email ? `mailto:${inv.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}` : "", wa: `https://wa.me/${inv.phone || ""}?text=${encodeURIComponent(waText)}`, waText, link };
 }
@@ -2216,10 +2451,11 @@ async function copyText(txt, ok) { try { await navigator.clipboard.writeText(txt
 
 /* --- Export de la liste --- */
 const gotSet = () => new Set([...coordRows.values()].flatMap((r) => [String(r.id || ""), String(r.em || "")]).filter(Boolean));
+const agrOf = (i) => (i && i.email ? AGRS.get(String(i.email).toLowerCase()) || null : null);
 const hasRes = (got, i) => got.has(i.code) || (!!i.email && got.has(i.email));
 function exportRows() {
   const got = gotSet();
-  return [...invites.values()].sort((a, b) => a.at - b.at).map((i) => { const m = invMail(i), parts = (i.name || "").split(" "); return { "Prénom": parts[0] || "", "Nom": parts.slice(1).join(" "), "E-mail": i.email || "", "WhatsApp": fmtPhone(i.phone), "Code testeur": i.code, "Code d'invitation": inviteCode(i.code), "Lien personnel": m.link, "Statut": hasRes(got, i) ? "Résultat reçu" : "En attente", "Invité le": new Date(i.at).toLocaleDateString("fr-FR"), "Message WhatsApp": m.waText }; });
+  return [...invites.values()].sort((a, b) => a.at - b.at).map((i) => { const m = invMail(i), parts = (i.name || "").split(" "); return { "Prénom": parts[0] || "", "Nom": parts.slice(1).join(" "), "E-mail": i.email || "", "WhatsApp": fmtPhone(i.phone), "Code testeur": i.code, "Code d'invitation": inviteCode(i.code), "Lien personnel": m.link, "Statut": hasRes(got, i) ? "Résultat reçu" : "En attente", "Engagement": agrOf(i) ? "Signé le " + agrWhen(agrOf(i)) : "À signer", "Invité le": new Date(i.at).toLocaleDateString("fr-FR"), "Message WhatsApp": m.waText }; });
 }
 async function downloadList() {
   const rows = exportRows(); if (!rows.length) return;
@@ -2239,10 +2475,11 @@ function renderInvites() {
   const box = $("#ilist"); if (!box) return;
   const list = [...invites.values()].sort((a, b) => b.at - a.at);
   const got = gotSet();
-  const nOk = list.filter((i) => hasRes(got, i)).length;
-  box.innerHTML = list.length ? `<div class="ibar"><p class="lbl" style="margin:0">${list.length} invitation${list.length > 1 ? "s" : ""} · ${nOk} résultat${nOk > 1 ? "s" : ""} reçu${nOk > 1 ? "s" : ""}</p><div class="ltools">${IN_CLAUDE ? "" : `<button class="btn gold" id="idl" type="button">Télécharger la liste (Excel)</button>`}<button class="btn ${IN_CLAUDE ? "gold" : "ghost"}" id="icp" type="button">Copier tout</button></div></div>${IN_CLAUDE && publicCoord() ? `<p class="small" style="margin-top:8px">Pour télécharger la liste en Excel ou le modèle à remplir, ouvre l'outil sur le site public : <a href="${esc(publicCoord())}" target="_blank" rel="noopener">${esc(publicCoord())}</a></p>` : ""}` + list.map((i) => { const m = invMail(i), ok = hasRes(got, i), k = keyOfInv(i); return `<div class="inv-row"><div class="who"><b>${esc(i.name || "Sans prénom")}</b><span class="st ${ok ? "ok" : "wait"}">${ok ? "Résultat reçu" : "En attente"}</span></div><div class="who"><span class="small" style="word-break:break-all">${esc([i.email, fmtPhone(i.phone)].filter(Boolean).join(" · "))}</span></div><div class="who"><span class="code2">${esc(inviteCode(i.code))}</span><span class="small">invité le ${new Date(i.at).toLocaleDateString("fr-FR")}</span></div><div class="acts">${m.href ? `<a class="btn gold" href="${esc(m.href)}" target="_blank" rel="noopener">E-mail</a>` : ""}<a class="btn ${m.href ? "ghost" : "gold"}" href="${esc(m.wa)}" target="_blank" rel="noopener">WhatsApp</a><button class="btn ghost" data-link="${esc(k)}" type="button">Copier le lien</button>${m.href ? `<button class="btn ghost" data-copy="${esc(k)}" type="button">Copier l'e-mail</button>` : ""}<button class="btn ghost" data-del="${esc(k)}" type="button" aria-label="Retirer ${esc(i.name || k)}">Retirer</button></div></div>`; }).join("") : `<p class="small" style="margin-top:10px">Aucune invitation pour l'instant.</p>`;
+  const nOk = list.filter((i) => hasRes(got, i)).length, nAg = FB_ON ? list.filter((i) => agrOf(i)).length : 0;
+  box.innerHTML = list.length ? `<div class="ibar"><p class="lbl" style="margin:0">${list.length} invitation${list.length > 1 ? "s" : ""} · ${nOk} résultat${nOk > 1 ? "s" : ""} reçu${nOk > 1 ? "s" : ""}${FB_ON ? ` · ${nAg} engagement${nAg > 1 ? "s" : ""} signé${nAg > 1 ? "s" : ""}` : ""}</p><div class="ltools">${IN_CLAUDE ? "" : `<button class="btn gold" id="idl" type="button">Télécharger la liste (Excel)</button>`}<button class="btn ${IN_CLAUDE ? "gold" : "ghost"}" id="icp" type="button">Copier tout</button></div></div>${IN_CLAUDE && publicCoord() ? `<p class="small" style="margin-top:8px">Pour télécharger la liste en Excel ou le modèle à remplir, ouvre l'outil sur le site public : <a href="${esc(publicCoord())}" target="_blank" rel="noopener">${esc(publicCoord())}</a></p>` : ""}` + list.map((i) => { const m = invMail(i), ok = hasRes(got, i), k = keyOfInv(i); return `<div class="inv-row"><div class="who"><b>${esc(i.name || "Sans prénom")}</b><span class="st ${ok ? "ok" : "wait"}">${ok ? "Résultat reçu" : "En attente"}</span></div>${FB_ON ? `<div class="who"><span class="st ${agrOf(i) ? "ok" : "wait"}">${agrOf(i) ? "Engagement signé le " + esc(agrWhen(agrOf(i))) : "Engagement de confidentialité à signer"}</span></div>` : ""}<div class="who"><span class="small" style="word-break:break-all">${esc([i.email, fmtPhone(i.phone)].filter(Boolean).join(" · "))}</span></div><div class="who"><span class="code2">${esc(inviteCode(i.code))}</span><span class="small">invité le ${new Date(i.at).toLocaleDateString("fr-FR")}</span></div><div class="acts">${m.href ? `<a class="btn gold" href="${esc(m.href)}" target="_blank" rel="noopener">E-mail</a>` : ""}<a class="btn ${m.href ? "ghost" : "gold"}" href="${esc(m.wa)}" target="_blank" rel="noopener">WhatsApp</a><button class="btn ghost" data-link="${esc(k)}" type="button">Copier le lien</button>${FB_ON && agrOf(i) ? `<button class="btn ghost" data-agr="${esc(k)}" type="button">Voir l'engagement</button>` : ""}${m.href ? `<button class="btn ghost" data-copy="${esc(k)}" type="button">Copier l'e-mail</button>` : ""}<button class="btn ghost" data-del="${esc(k)}" type="button" aria-label="Retirer ${esc(i.name || k)}">Retirer</button></div></div>`; }).join("") : `<p class="small" style="margin-top:10px">Aucune invitation pour l'instant.</p>`;
   const dl = $("#idl"); if (dl) dl.onclick = downloadList; const cp = $("#icp"); if (cp) cp.onclick = copyAll;
   $$("[data-copy]", box).forEach((b) => (b.onclick = () => { const i = invites.get(b.dataset.copy); if (!i) return; const m = invMail(i); copyText(`Objet : ${m.subject}\n\n${m.body}`, `Invitation de ${i.name || i.email} copiée : colle-la dans ta messagerie.`); }));
+  $$("[data-agr]", box).forEach((b) => (b.onclick = () => { const i = invites.get(b.dataset.agr); if (i) agrCopy(agrOf(i)); }));
   $$("[data-link]", box).forEach((b) => (b.onclick = () => { const i = invites.get(b.dataset.link); if (!i) return; copyText(invMail(i).link, `Lien personnel de ${i.name || i.email || fmtPhone(i.phone)} copié.`); }));
   $$("[data-del]", box).forEach((b) => (b.onclick = async () => { const k = b.dataset.del; invites.delete(k); saveInvites(); if (dbRef && canSave) { try { await dbRef.collection("invites").doc(invKey(k)).delete(); } catch (e) {} } renderInvites(); }));
 }
